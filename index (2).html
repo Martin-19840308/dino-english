@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Dino English 🦖</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #2c2c2c;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Fredoka One', cursive;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 440px;
+      padding: 12px;
+    }
+
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    /* ══ MAP ══ */
+    .map-wrap {
+      background: #3a3a3a;
+      border-radius: 18px;
+      padding: 22px;
+    }
+    .map-title {
+      text-align: center;
+      font-size: 30px;
+      color: #FFD700;
+      letter-spacing: 3px;
+      margin-bottom: 4px;
+      text-shadow: 0 2px 0 #7a5a00;
+    }
+    .map-sub { text-align: center; font-size: 13px; color: #aaa; margin-bottom: 14px; }
+    .stars-pill {
+      display: block; width: fit-content; margin: 0 auto 18px;
+      background: #FFD700; color: #7a5a00;
+      font-size: 14px; padding: 5px 22px; border-radius: 20px;
+    }
+    .zones-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 12px; }
+    .zones-bot  { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; max-width: 67%; margin: 0 auto 18px; }
+
+    .zone-card {
+      border-radius: 14px; padding: 14px 8px;
+      text-align: center; cursor: pointer;
+      border: 3px solid transparent;
+      transition: transform 0.15s, border-color 0.2s;
+      user-select: none;
+      position: relative;
+    }
+    .zone-card:not(.locked):hover { transform: scale(1.07); }
+    .zone-card.locked { opacity: 0.4; filter: grayscale(0.6); cursor: not-allowed; }
+    .zone-card.done   { border-color: #FFD700; }
+
+    .z-volcan { background: #8b2222; }
+    .z-selva  { background: #1b6b35; }
+    .z-lago   { background: #1a4a7a; }
+    .z-mtn    { background: #5a5a6a; }
+    .z-cueva  { background: #3d1f5a; }
+
+    .z-dino   { font-size: 30px; display: block; margin-bottom: 5px; }
+    .z-name   { font-size: 11px; color: rgba(255,255,255,0.95); text-transform: uppercase; letter-spacing: 1px; }
+    .z-vocab  { font-size: 10px; color: rgba(255,255,255,0.65); margin-top: 2px; }
+    .z-stars  { display: flex; justify-content: center; gap: 2px; margin-top: 5px; font-size: 11px; }
+    .z-lock   { font-size: 13px; margin-bottom: 3px; }
+
+    .prog-box  { background: rgba(0,0,0,0.25); border-radius: 10px; padding: 10px 14px; }
+    .prog-row  { display: flex; justify-content: space-between; margin-bottom: 6px; }
+    .prog-lbl  { color: #aaa; font-size: 11px; }
+    .prog-val  { color: #FFD700; font-size: 11px; }
+    .prog-bg   { background: rgba(0,0,0,0.3); border-radius: 20px; height: 8px; overflow: hidden; }
+    .prog-fill { background: #FFD700; height: 100%; border-radius: 20px; transition: width 0.4s; }
+
+    /* ══ GAME ══ */
+    .game-wrap { border-radius: 18px; padding: 18px; min-height: 460px; }
+
+    .g-topbar  { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .back-btn  {
+      background: rgba(0,0,0,0.35); color: #fff; border: none;
+      border-radius: 20px; padding: 6px 16px; font-size: 13px;
+      cursor: pointer; font-family: 'Fredoka One', cursive;
+    }
+    .back-btn:hover { background: rgba(0,0,0,0.55); }
+    .score-pill { background: rgba(0,0,0,0.35); color: #FFD700; font-size: 13px; padding: 6px 16px; border-radius: 20px; }
+
+    .g-dots { display: flex; gap: 6px; justify-content: center; margin-bottom: 14px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.2); }
+    .dot.done { background: #FFD700; }
+    .dot.cur  { background: #fff; }
+
+    /* color swatch (Volcano only) */
+    .swatch {
+      width: 90px; height: 90px; border-radius: 16px;
+      margin: 0 auto 6px; border: 3px solid rgba(255,255,255,0.3);
+    }
+    .item-hint { text-align: center; color: rgba(255,255,255,0.65); font-size: 11px; letter-spacing: 1px; margin-bottom: 12px; }
+
+    /* emoji display (all other zones) */
+    .item-emoji {
+      font-size: 72px; text-align: center; margin-bottom: 6px;
+      line-height: 1; display: block;
+    }
+
+    .dino-row { display: flex; align-items: flex-end; justify-content: center; gap: 10px; margin-bottom: 14px; }
+    .dino-ico { font-size: 42px; line-height: 1; }
+    .speech   {
+      background: rgba(0,0,0,0.3); color: #fff;
+      border-radius: 10px; padding: 8px 14px;
+      font-size: 13px; max-width: 200px;
+    }
+
+    .slots { display: flex; gap: 8px; justify-content: center; margin-bottom: 14px; flex-wrap: wrap; }
+    .slot  {
+      width: 46px; height: 52px;
+      background: rgba(0,0,0,0.3);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; color: #fff; cursor: pointer;
+      transition: background 0.1s, border-color 0.1s;
+    }
+    .slot.filled  { background: rgba(255,215,0,0.2);  border-color: #FFD700; }
+    .slot.correct { background: rgba(40,200,80,0.35); border-color: #4ade80; }
+    .slot.wrong   { background: rgba(220,40,40,0.35); border-color: #f87171; }
+
+    .pool  { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 14px; }
+    .tile  {
+      width: 46px; height: 52px;
+      background: rgba(255,255,255,0.15);
+      border: 2px solid rgba(255,255,255,0.25);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; color: #fff; cursor: pointer;
+      transition: transform 0.1s, background 0.1s;
+      user-select: none;
+    }
+    .tile:hover  { background: rgba(255,255,255,0.25); transform: scale(1.08); }
+    .tile:active { transform: scale(0.94); }
+    .tile.used   { opacity: 0.15; pointer-events: none; }
+
+    .act-row { display: flex; gap: 10px; justify-content: center; margin-bottom: 10px; }
+    .btn-clear {
+      background: rgba(0,0,0,0.3); color: rgba(255,255,255,0.8); border: none;
+      border-radius: 10px; padding: 10px 20px; font-size: 14px;
+      cursor: pointer; font-family: 'Fredoka One', cursive;
+    }
+    .btn-check {
+      background: #c0392b; color: #fff; border: none;
+      border-radius: 10px; padding: 10px 26px; font-size: 14px;
+      cursor: pointer; font-family: 'Fredoka One', cursive;
+      transition: opacity 0.2s;
+    }
+    .btn-check:disabled { opacity: 0.35; cursor: not-allowed; }
+    .btn-next  {
+      background: #27ae60; color: #fff; border: none;
+      border-radius: 10px; padding: 10px 26px; font-size: 14px;
+      cursor: pointer; font-family: 'Fredoka One', cursive;
+      display: none;
+    }
+
+    .feedback   { text-align: center; font-size: 14px; min-height: 20px; color: #fff; margin-bottom: 6px; }
+    .live-stars { display: flex; gap: 4px; justify-content: center; font-size: 18px; }
+
+    /* ══ RESULT ══ */
+    .result-wrap {
+      border-radius: 18px; padding: 18px;
+      min-height: 400px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .result-inner { text-align: center; padding: 20px 10px; }
+    .res-dino  { font-size: 64px; margin-bottom: 12px; }
+    .res-title { font-size: 28px; color: #FFD700; margin-bottom: 6px; }
+    .res-sub   { color: rgba(255,255,255,0.85); font-size: 15px; margin-bottom: 8px; }
+    .res-score { color: rgba(255,255,255,0.55); font-size: 13px; margin-bottom: 16px; }
+    .res-stars { display: flex; gap: 8px; justify-content: center; margin-bottom: 24px; font-size: 36px; }
+    .btn-map   {
+      background: #FFD700; color: #5a3a00; border: none;
+      border-radius: 12px; padding: 12px 32px;
+      font-size: 16px; cursor: pointer; font-family: 'Fredoka One', cursive;
+    }
+    .btn-map:hover { background: #f0c000; }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- MAP -->
+  <div id="screen-map" class="screen active">
+    <div class="map-wrap">
+      <div class="map-title">DINO ENGLISH</div>
+      <div class="map-sub">Learn English with dinosaurs!</div>
+      <span class="stars-pill" id="stars-pill">⭐ 0 / 15 stars</span>
+
+      <div class="zones-grid">
+        <div class="zone-card z-volcan" id="card-volcan" onclick="selectZone('volcan')">
+          <span class="z-dino">🦖</span>
+          <div class="z-name">Volcano</div>
+          <div class="z-vocab">Colors</div>
+          <div class="z-stars" id="stars-volcan"><span>☆</span><span>☆</span><span>☆</span></div>
+        </div>
+        <div class="zone-card z-selva" id="card-selva" onclick="selectZone('selva')">
+          <span class="z-dino">🦕</span>
+          <div class="z-name">Jungle</div>
+          <div class="z-vocab">Animals</div>
+          <div class="z-stars" id="stars-selva"><span>☆</span><span>☆</span><span>☆</span></div>
+        </div>
+        <div class="zone-card z-lago locked" id="card-lago" onclick="selectZone('lago')">
+          <div class="z-lock">🔒</div>
+          <span class="z-dino">🐊</span>
+          <div class="z-name">Lake</div>
+          <div class="z-vocab">Numbers</div>
+          <div class="z-stars" id="stars-lago"><span>☆</span><span>☆</span><span>☆</span></div>
+        </div>
+      </div>
+      <div class="zones-bot">
+        <div class="zone-card z-mtn locked" id="card-montana" onclick="selectZone('montana')">
+          <div class="z-lock">🔒</div>
+          <span class="z-dino">🦏</span>
+          <div class="z-name">Mountain</div>
+          <div class="z-vocab">Body</div>
+          <div class="z-stars" id="stars-montana"><span>☆</span><span>☆</span><span>☆</span></div>
+        </div>
+        <div class="zone-card z-cueva locked" id="card-cueva" onclick="selectZone('cueva')">
+          <div class="z-lock">🔒</div>
+          <span class="z-dino">🦇</span>
+          <div class="z-name">Cave</div>
+          <div class="z-vocab">Food</div>
+          <div class="z-stars" id="stars-cueva"><span>☆</span><span>☆</span><span>☆</span></div>
+        </div>
+      </div>
+
+      <div class="prog-box">
+        <div class="prog-row">
+          <span class="prog-lbl">Progress</span>
+          <span class="prog-val" id="prog-txt">0 / 5 zones</span>
+        </div>
+        <div class="prog-bg"><div class="prog-fill" id="prog-bar" style="width:0%"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAME -->
+  <div id="screen-game" class="screen">
+    <div class="game-wrap" id="game-wrap">
+      <div class="g-topbar">
+        <button class="back-btn" onclick="goMap()">← Map</button>
+        <div class="score-pill">Score: <span id="score-val">0</span></div>
+      </div>
+      <div class="g-dots" id="g-dots"></div>
+      <div id="item-display"></div>
+      <div class="dino-row">
+        <div class="dino-ico" id="dino-ico">🦖</div>
+        <div class="speech" id="speech">Spell it!</div>
+      </div>
+      <div class="slots" id="slots"></div>
+      <div class="pool"  id="pool"></div>
+      <div class="act-row">
+        <button class="btn-clear" onclick="clearAnswer()">Clear</button>
+        <button class="btn-check" id="btn-check" onclick="checkAnswer()" disabled>Check!</button>
+        <button class="btn-next"  id="btn-next"  onclick="nextWord()">Next →</button>
+      </div>
+      <div class="feedback" id="feedback"></div>
+      <div class="live-stars">
+        <span id="ls1" style="opacity:0.25">⭐</span>
+        <span id="ls2" style="opacity:0.25">⭐</span>
+        <span id="ls3" style="opacity:0.25">⭐</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="screen-result" class="screen">
+    <div class="result-wrap" id="result-wrap">
+      <div class="result-inner">
+        <div class="res-dino"  id="res-dino">🦖</div>
+        <div class="res-title" id="res-title"></div>
+        <div class="res-sub"   id="res-sub"></div>
+        <div class="res-score" id="res-score"></div>
+        <div class="res-stars" id="res-stars"></div>
+        <button class="btn-map" onclick="goMap()">← Back to map</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script>
+/* ══════════════════════════════════
+   DATA — 10 items per zone
+   type: 'color' shows a hex swatch
+   type: 'emoji' shows a big emoji
+══════════════════════════════════ */
+const ZONES = {
+  volcan: {
+    name:'Volcano', emoji:'🦖', bg:'#5a1010', vocab:'Colors', type:'color',
+    items:[
+      {w:'RED',    display:'#e74c3c'},
+      {w:'BLUE',   display:'#3498db'},
+      {w:'GREEN',  display:'#27ae60'},
+      {w:'YELLOW', display:'#f1c40f'},
+      {w:'ORANGE', display:'#e67e22'},
+      {w:'PURPLE', display:'#8e44ad'},
+      {w:'PINK',   display:'#e91e8c'},
+      {w:'WHITE',  display:'#ecf0f1'},
+      {w:'BLACK',  display:'#2c3e50'},
+      {w:'BROWN',  display:'#795548'},
+    ]
+  },
+  selva: {
+    name:'Jungle', emoji:'🦕', bg:'#1a4a1a', vocab:'Animals', type:'emoji',
+    items:[
+      {w:'CAT',      display:'🐱'},
+      {w:'DOG',      display:'🐶'},
+      {w:'BIRD',     display:'🐦'},
+      {w:'FISH',     display:'🐟'},
+      {w:'LION',     display:'🦁'},
+      {w:'BEAR',     display:'🐻'},
+      {w:'DUCK',     display:'🦆'},
+      {w:'FROG',     display:'🐸'},
+      {w:'HORSE',    display:'🐴'},
+      {w:'RABBIT',   display:'🐰'},
+    ]
+  },
+  lago: {
+    name:'Lake', emoji:'🐊', bg:'#0d2d4a', vocab:'Numbers', type:'emoji',
+    items:[
+      {w:'ONE',   display:'1️⃣'},
+      {w:'TWO',   display:'2️⃣'},
+      {w:'THREE', display:'3️⃣'},
+      {w:'FOUR',  display:'4️⃣'},
+      {w:'FIVE',  display:'5️⃣'},
+      {w:'SIX',   display:'6️⃣'},
+      {w:'SEVEN', display:'7️⃣'},
+      {w:'EIGHT', display:'8️⃣'},
+      {w:'NINE',  display:'9️⃣'},
+      {w:'TEN',   display:'🔟'},
+    ]
+  },
+  montana: {
+    name:'Mountain', emoji:'🦏', bg:'#2d2d3a', vocab:'Body', type:'emoji',
+    items:[
+      {w:'EYE',    display:'👁️'},
+      {w:'EAR',    display:'👂'},
+      {w:'NOSE',   display:'👃'},
+      {w:'HAND',   display:'✋'},
+      {w:'FOOT',   display:'🦶'},
+      {w:'MOUTH',  display:'👄'},
+      {w:'HEAD',   display:'🤯'},
+      {w:'ARM',    display:'💪'},
+      {w:'LEG',    display:'🦵'},
+      {w:'BACK',   display:'🔙'},
+    ]
+  },
+  cueva: {
+    name:'Cave', emoji:'🦇', bg:'#2d1b4e', vocab:'Food', type:'emoji',
+    items:[
+      {w:'APPLE',  display:'🍎'},
+      {w:'BREAD',  display:'🍞'},
+      {w:'MILK',   display:'🥛'},
+      {w:'RICE',   display:'🍚'},
+      {w:'CAKE',   display:'🎂'},
+      {w:'EGG',    display:'🥚'},
+      {w:'SOUP',   display:'🍜'},
+      {w:'MEAT',   display:'🥩'},
+      {w:'FISH',   display:'🐟'},
+      {w:'PIZZA',  display:'🍕'},
+    ]
+  }
+};
+
+const ZONE_ORDER = ['volcan','selva','lago','montana','cueva'];
+
+/* ══ PROGRESS ══ */
+function loadProg() {
+  try { const s = localStorage.getItem('dinoEng2'); if(s) return JSON.parse(s); } catch(e){}
+  const p = {};
+  ZONE_ORDER.forEach(id => { p[id] = {stars:0, completed:false}; });
+  return p;
+}
+function saveProg() { try { localStorage.setItem('dinoEng2', JSON.stringify(progress)); } catch(e){} }
+let progress = loadProg();
+
+function updateMap() {
+  let total = 0, completed = 0;
+  ZONE_ORDER.forEach((id, idx) => {
+    const prog = progress[id];
+    const card = document.getElementById('card-'+id);
+    const starsEl = document.getElementById('stars-'+id);
+    total += prog.stars;
+    if(prog.completed) completed++;
+
+    // update stars display
+    if(starsEl) {
+      starsEl.innerHTML = [1,2,3].map(i =>
+        '<span style="opacity:'+(i<=prog.stars?'1':'0.25')+'">⭐</span>'
+      ).join('');
+    }
+
+    // unlock logic: first two always open, rest unlock when previous is completed
+    const shouldUnlock = idx < 2 || progress[ZONE_ORDER[idx-1]].completed;
+    if(card) {
+      if(shouldUnlock) {
+        card.classList.remove('locked');
+        // remove lock icon if present
+        const lockEl = card.querySelector('.z-lock');
+        if(lockEl) lockEl.style.display = 'none';
+      } else {
+        card.classList.add('locked');
+        const lockEl = card.querySelector('.z-lock');
+        if(lockEl) lockEl.style.display = 'block';
+      }
+      if(prog.stars === 3) card.classList.add('done');
+      else card.classList.remove('done');
+    }
+  });
+  document.getElementById('stars-pill').textContent = '⭐ '+total+' / 15 stars';
+  document.getElementById('prog-txt').textContent = completed+' / 5 zones';
+  document.getElementById('prog-bar').style.width = (completed/5*100)+'%';
+}
+
+/* ══ SCREENS ══ */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+}
+function goMap() { updateMap(); showScreen('map'); }
+
+/* ══ GAME STATE ══ */
+let curZoneId, curWords, curIdx, tiles, answer, checked, score, totalErrors;
+
+function selectZone(id) {
+  // check unlock
+  const idx = ZONE_ORDER.indexOf(id);
+  const shouldUnlock = idx < 2 || progress[ZONE_ORDER[idx-1]].completed;
+  if(!shouldUnlock) return;
+
+  curZoneId   = id;
+  // pick 5 random items from the 10, shuffled
+  curWords    = shuffle(ZONES[id].items).slice(0, 5);
+  curIdx      = 0;
+  score       = 0;
+  totalErrors = 0;
+  checked     = false;
+
+  document.getElementById('game-wrap').style.background = ZONES[id].bg;
+  document.getElementById('dino-ico').textContent = ZONES[id].emoji;
+  document.getElementById('score-val').textContent = '0';
+  showScreen('game');
+  loadWord();
+}
+
+/* ══ SHUFFLE ══ */
+function shuffle(a) {
+  const b = [...a];
+  for(let i=b.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [b[i],b[j]] = [b[j],b[i]];
+  }
+  return b;
+}
+
+/* ══ LOAD WORD ══ */
+function loadWord() {
+  checked = false;
+  document.getElementById('btn-check').style.display = 'inline-block';
+  document.getElementById('btn-check').disabled = true;
+  document.getElementById('btn-next').style.display = 'none';
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('speech').textContent = 'Spell it!';
+  document.getElementById('ls1').style.opacity = '0.25';
+  document.getElementById('ls2').style.opacity = '0.25';
+  document.getElementById('ls3').style.opacity = '0.25';
+
+  buildDots();
+
+  const item = curWords[curIdx];
+  const zone = ZONES[curZoneId];
+  const displayEl = document.getElementById('item-display');
+
+  if(zone.type === 'color') {
+    displayEl.innerHTML = `
+      <div class="swatch" style="background:${item.display}"></div>
+      <div class="item-hint">What color is this?</div>
+    `;
+  } else {
+    displayEl.innerHTML = `
+      <div class="item-emoji">${item.display}</div>
+      <div class="item-hint">What is this?</div>
+    `;
+  }
+
+  buildSlots(item.w.length);
+  buildPool(item.w);
+}
+
+function buildDots() {
+  const el = document.getElementById('g-dots');
+  el.innerHTML = '';
+  curWords.forEach((_,i) => {
+    const d = document.createElement('div');
+    d.className = 'dot'+(i < curIdx ? ' done' : i === curIdx ? ' cur' : '');
+    el.appendChild(d);
+  });
+}
+
+function buildSlots(len) {
+  answer = Array(len).fill(null);
+  const el = document.getElementById('slots');
+  el.innerHTML = '';
+  for(let i=0;i<len;i++){
+    const s = document.createElement('div');
+    s.className = 'slot';
+    s.id = 'sl'+i;
+    s.onclick = () => removeSlot(i);
+    el.appendChild(s);
+  }
+}
+
+function buildPool(word) {
+  const EXTRA = 'AEIOURNSTLCDPBMFGHKVWXYZ';
+  let letters = [...word];
+  // add enough extra letters to make it challenging but not impossible
+  const extraCount = Math.min(6, word.length + 4);
+  while(letters.length < word.length + extraCount) {
+    letters.push(EXTRA[Math.floor(Math.random() * EXTRA.length)]);
+  }
+  tiles = shuffle(letters).map((l, id) => ({l, id, used: false}));
+  const el = document.getElementById('pool');
+  el.innerHTML = '';
+  tiles.forEach(t => {
+    const d = document.createElement('div');
+    d.className = 'tile';
+    d.id = 'tl'+t.id;
+    d.textContent = t.l;
+    d.onclick = () => tapTile(t.id);
+    el.appendChild(d);
+  });
+}
+
+function tapTile(id) {
+  if(checked) return;
+  const t = tiles.find(x => x.id === id);
+  if(!t || t.used) return;
+  const ei = answer.indexOf(null);
+  if(ei === -1) return;
+  answer[ei] = id;
+  t.used = true;
+  document.getElementById('tl'+id).classList.add('used');
+  const sl = document.getElementById('sl'+ei);
+  sl.textContent = t.l;
+  sl.classList.add('filled');
+  document.getElementById('btn-check').disabled = answer.includes(null);
+}
+
+function removeSlot(i) {
+  if(checked) return;
+  const id = answer[i];
+  if(id === null) return;
+  answer[i] = null;
+  tiles.find(x => x.id === id).used = false;
+  document.getElementById('tl'+id).classList.remove('used');
+  const sl = document.getElementById('sl'+i);
+  sl.textContent = '';
+  sl.classList.remove('filled');
+  document.getElementById('btn-check').disabled = true;
+}
+
+function clearAnswer() {
+  if(checked) return;
+  answer.forEach(id => {
+    if(id !== null) {
+      tiles.find(x => x.id === id).used = false;
+      document.getElementById('tl'+id).classList.remove('used');
+    }
+  });
+  const len = curWords[curIdx].w.length;
+  answer = Array(len).fill(null);
+  document.querySelectorAll('.slot').forEach(s => {
+    s.textContent = '';
+    s.classList.remove('filled');
+  });
+  document.getElementById('btn-check').disabled = true;
+}
+
+function checkAnswer() {
+  if(checked) return;
+  checked = true;
+  const typed   = answer.map(id => tiles.find(x => x.id === id).l).join('');
+  const correct = curWords[curIdx].w;
+  document.querySelectorAll('.slot').forEach((s,i) => {
+    s.classList.remove('filled');
+    s.classList.add(typed[i] === correct[i] ? 'correct' : 'wrong');
+  });
+  if(typed === correct) {
+    score += 10;
+    document.getElementById('score-val').textContent = score;
+    document.getElementById('feedback').textContent  = 'Perfect! 🎉';
+    document.getElementById('speech').textContent    = 'Amazing! You got it!';
+  } else {
+    totalErrors++;
+    document.getElementById('feedback').textContent = 'The answer is: ' + correct;
+    document.getElementById('speech').textContent   = 'Almost! Keep going!';
+  }
+  // update live stars
+  document.getElementById('ls1').style.opacity = '1';
+  document.getElementById('ls2').style.opacity = totalErrors <= 1 ? '1' : '0.25';
+  document.getElementById('ls3').style.opacity = totalErrors === 0 ? '1' : '0.25';
+
+  document.getElementById('btn-check').style.display = 'none';
+  document.getElementById('btn-next').style.display  = 'inline-block';
+  if(curIdx + 1 >= curWords.length)
+    document.getElementById('btn-next').textContent = 'Finish! 🎉';
+  else
+    document.getElementById('btn-next').textContent = 'Next →';
+}
+
+function nextWord() {
+  curIdx++;
+  if(curIdx >= curWords.length) { showResult(); return; }
+  loadWord();
+}
+
+function showResult() {
+  const stars = totalErrors === 0 ? 3 : totalErrors <= 1 ? 2 : 1;
+  progress[curZoneId].stars     = Math.max(progress[curZoneId].stars, stars);
+  progress[curZoneId].completed = true;
+  saveProg();
+
+  const zone = ZONES[curZoneId];
+  document.getElementById('result-wrap').style.background = zone.bg;
+  document.getElementById('res-dino').textContent  = zone.emoji;
+  document.getElementById('res-title').textContent = stars === 3 ? 'Perfect score!' : stars === 2 ? 'Great job!' : 'Good effort!';
+  document.getElementById('res-sub').textContent   = stars === 3 ? zone.name+' master!' : stars === 2 ? 'Almost perfect!' : 'Keep practicing!';
+  document.getElementById('res-score').textContent = 'Score: ' + score;
+  document.getElementById('res-stars').innerHTML   = [1,2,3].map(i =>
+    '<span style="font-size:36px;opacity:'+(i<=stars?1:0.2)+'">⭐</span>'
+  ).join('');
+  showScreen('result');
+}
+
+/* init */
+updateMap();
+</script>
+</body>
+</html>
