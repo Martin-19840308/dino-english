@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dino Learn 🦖</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ── VARIABLES ─────────────────────────────────── */
+:root{
+  --bg:#F4FBFF;
+  --w:#fff;
+  --green:#27AE60; --gd:#1e8449; --gl:#d5f5e3;
+  --blue:#2980B9;  --bd:#1a5276; --bl:#d6eaf8;
+  --orange:#E67E22;--od:#a04000; --ol:#fdebd0;
+  --purple:#8E44AD;--pd:#6c3483; --pl:#e8daef;
+  --red:#C0392B;   --rl:#fadbd8;
+  --yellow:#F39C12;--yl:#fef9e7;
+  --gray:#7F8C8D;  --g2:#ecf0f1;
+  --sh:0 8px 30px rgba(0,0,0,.11);
+  --shs:0 3px 14px rgba(0,0,0,.08);
+  --r:22px;
+  --fh:'Fredoka One',cursive;
+  --fb:'Nunito',sans-serif;
+}
+
+/* ── RESET ─────────────────────────────────────── */
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--fb);background:var(--bg);min-height:100vh;overflow-x:hidden;}
+button{cursor:pointer;font-family:var(--fb);border:none;}
+
+/* ── SCREENS ───────────────────────────────────── */
+.screen{display:none;min-height:100vh;padding:20px 16px 48px;
+  flex-direction:column;align-items:center;animation:fadeIn .28s ease;}
+.screen.active{display:flex;}
+
+/* ── KEYFRAMES ─────────────────────────────────── */
+@keyframes fadeIn   {from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes popIn    {from{transform:scale(.78);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes floatY   {0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+@keyframes shake    {0%,100%{transform:translateX(0)}25%{transform:translateX(-9px)}75%{transform:translateX(9px)}}
+@keyframes tPulse   {0%,100%{transform:scale(1)}50%{transform:scale(1.22)}}
+@keyframes confFall {to{transform:translateY(110vh) rotate(740deg);opacity:0}}
+@keyframes starPop  {0%{transform:scale(0) rotate(-20deg)}70%{transform:scale(1.3) rotate(5deg)}100%{transform:scale(1) rotate(0)}}
+@keyframes slideUp  {from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+
+/* ── SHARED COMPONENTS ─────────────────────────── */
+.dino-hero{font-size:3.6rem;display:inline-block;animation:floatY 3s ease-in-out infinite;
+  filter:drop-shadow(0 6px 12px rgba(0,0,0,.13));}
+
+.btn-back{background:var(--g2);border:2.5px solid #ddd;border-radius:100px;
+  padding:10px 24px;font-size:.95rem;font-weight:700;color:#555;
+  transition:all .15s;margin-top:20px;}
+.btn-back:hover{background:#dde4e6;transform:translateY(-2px);}
+
+.btn-green{background:var(--green);color:#fff;border-radius:100px;
+  padding:14px 36px;font-size:1.05rem;font-weight:800;
+  transition:all .16s;box-shadow:0 4px 14px rgba(39,174,96,.35);}
+.btn-green:hover{background:var(--gd);transform:translateY(-2px) scale(1.03);}
+
+.btn-ghost{background:var(--g2);color:#444;border-radius:100px;
+  padding:14px 28px;font-size:1rem;font-weight:700;transition:all .16s;}
+.btn-ghost:hover{background:#dde;transform:translateY(-2px);}
+
+.page-title{font-family:var(--fh);font-size:clamp(1.9rem,5vw,2.7rem);
+  text-align:center;margin-bottom:4px;}
+.page-sub{color:#778;font-size:.97rem;text-align:center;margin-bottom:26px;}
+
+/* ── HOME ──────────────────────────────────────── */
+#home{justify-content:center;
+  background:radial-gradient(ellipse at 20% 0%,#d5f5e3 0%,transparent 55%),
+             radial-gradient(ellipse at 80% 100%,#d6eaf8 0%,transparent 55%),
+             var(--bg);}
+.home-head{text-align:center;margin-bottom:36px;}
+.home-head h1{font-family:var(--fh);font-size:clamp(2.6rem,7vw,4rem);
+  color:var(--gd);margin-top:10px;letter-spacing:.5px;}
+.home-head p{font-size:1.05rem;color:#666;margin-top:7px;}
+
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));
+  gap:20px;width:100%;max-width:820px;}
+.cat-card{background:var(--w);border-radius:var(--r);box-shadow:var(--sh);
+  padding:28px 20px 22px;text-align:center;cursor:pointer;
+  transition:transform .2s,box-shadow .2s;border-top:5px solid;}
+.cat-card:hover{transform:translateY(-8px) scale(1.02);
+  box-shadow:0 16px 42px rgba(0,0,0,.15);}
+.cat-card.ce{border-top-color:var(--green);}
+.cat-card.cm{border-top-color:var(--blue);}
+.cat-card.cl{border-top-color:var(--purple);}
+.cat-card .icon{font-size:3rem;margin-bottom:10px;display:block;}
+.cat-card h2{font-family:var(--fh);font-size:1.6rem;margin-bottom:5px;}
+.cat-card.ce h2{color:var(--gd);}
+.cat-card.cm h2{color:var(--bd);}
+.cat-card.cl h2{color:var(--pd);}
+.cat-card p{font-size:.88rem;color:#888;line-height:1.4;}
+.cat-chip{display:inline-block;margin-top:13px;padding:5px 16px;
+  border-radius:100px;font-size:.8rem;font-weight:800;color:#fff;letter-spacing:.3px;}
+.cat-card.ce .cat-chip{background:var(--green);}
+.cat-card.cm .cat-chip{background:var(--blue);}
+.cat-card.cl .cat-chip{background:var(--purple);}
+
+/* ── MODULE SELECT ─────────────────────────────── */
+#moduleSelect{justify-content:center;}
+.mod-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));
+  gap:16px;width:100%;max-width:780px;}
+.mod-card{background:var(--w);border-radius:var(--r);box-shadow:var(--shs);
+  padding:24px 16px;text-align:center;cursor:pointer;border:3px solid #e8e8e8;
+  transition:transform .18s,box-shadow .18s,border-color .15s;}
+.mod-card:hover{transform:translateY(-6px);box-shadow:var(--sh);border-color:#bbb;}
+.mod-card .mi{font-size:2.4rem;margin-bottom:8px;}
+.mod-card h3{font-family:var(--fh);font-size:1.28rem;color:#333;}
+.mod-card small{font-size:.8rem;color:#999;display:block;margin-top:4px;}
+
+/* ── LEVEL SELECT ──────────────────────────────── */
+#levelSelect{justify-content:center;}
+.lv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:16px;width:100%;max-width:580px;}
+.lv-card{background:var(--w);border-radius:var(--r);box-shadow:var(--shs);
+  padding:24px 16px;text-align:center;cursor:pointer;border:3px solid;
+  transition:transform .18s,box-shadow .18s;}
+.lv-card:hover{transform:translateY(-6px);box-shadow:var(--sh);}
+.lv-card.easy  {border-color:var(--green);}  .lv-card.easy  h3{color:var(--gd);}
+.lv-card.medium{border-color:var(--orange);} .lv-card.medium h3{color:var(--od);}
+.lv-card.hard  {border-color:var(--red);}    .lv-card.hard   h3{color:var(--red);}
+.lv-card .li{font-size:2.4rem;margin-bottom:8px;}
+.lv-card h3{font-family:var(--fh);font-size:1.3rem;}
+.lv-card small{font-size:.82rem;color:#999;display:block;margin-top:5px;}
+
+/* ── GAME SCREEN ───────────────────────────────── */
+#game{justify-content:flex-start;padding-top:14px;}
+
+.game-topbar{display:flex;justify-content:space-between;align-items:center;
+  width:100%;max-width:700px;margin-bottom:12px;gap:10px;flex-wrap:wrap;}
+.game-label{font-family:var(--fh);font-size:1.2rem;color:#444;}
+.score-pill{background:var(--yl);color:#7d5a00;border-radius:100px;
+  padding:7px 18px;font-weight:900;font-size:1rem;
+  box-shadow:0 2px 8px rgba(243,156,18,.25);}
+
+.prog-wrap{width:100%;max-width:700px;background:#dde;border-radius:100px;
+  height:11px;margin-bottom:16px;overflow:hidden;}
+.prog-fill{height:100%;
+  background:linear-gradient(90deg,var(--blue),var(--green));
+  border-radius:100px;transition:width .45s ease;}
+
+/* Question card */
+.q-card{background:var(--w);border-radius:var(--r);box-shadow:var(--sh);
+  width:100%;max-width:700px;padding:28px 24px 24px;text-align:center;
+  animation:popIn .32s cubic-bezier(.34,1.56,.64,1);}
+.q-num{font-size:.78rem;font-weight:700;color:#bbb;text-transform:uppercase;
+  letter-spacing:1.2px;margin-bottom:8px;}
+.q-dino{font-size:2.4rem;margin-bottom:2px;transition:all .3s;display:inline-block;}
+
+/* ── SPELL (English) ───────────────────────────── */
+.emoji-stage{
+  width:100%;max-width:300px;height:210px;margin:0 auto 16px;
+  background:linear-gradient(135deg,#f8f9fa,#e9ecef);
+  border-radius:20px;display:flex;align-items:center;justify-content:center;
+  font-size:clamp(6rem,20vw,9rem);
+  box-shadow:inset 0 2px 8px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.08);
+  position:relative;overflow:hidden;}
+.emoji-stage::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.6),transparent 60%);}
+.spell-hint{font-size:1rem;color:#888;margin-bottom:12px;font-weight:700;}
+
+.letter-row{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin:14px 0 10px;}
+.lbox{width:50px;height:58px;border:3px solid #ddd;border-radius:13px;
+  font-family:var(--fh);font-size:1.85rem;text-align:center;text-transform:uppercase;
+  outline:none;background:#fafafa;color:#333;
+  transition:border-color .18s,background .18s,transform .1s;
+  -webkit-appearance:none;appearance:none;}
+.lbox:focus{border-color:var(--blue);background:#fff;
+  box-shadow:0 0 0 3px var(--bl);transform:scale(1.05);}
+.lbox.ok  {border-color:var(--green); background:var(--gl);color:var(--gd);}
+.lbox.bad {border-color:var(--red);   background:var(--rl);animation:shake .3s ease;}
+.lbox:disabled{opacity:.85;}
+
+.btn-verify{background:var(--blue);color:#fff;border-radius:100px;
+  padding:12px 38px;font-size:1.05rem;font-weight:800;margin-top:10px;
+  box-shadow:0 4px 14px rgba(41,128,185,.3);transition:all .15s;}
+.btn-verify:hover{background:var(--bd);transform:scale(1.04);}
+
+/* ── MULTIPLE CHOICE ───────────────────────────── */
+.q-text{font-family:var(--fh);font-size:clamp(1.45rem,4vw,2rem);
+  color:#222;margin:10px 0 22px;line-height:1.35;}
+.opts-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:6px;}
+.opt-btn{background:#f5f6f7;border:3px solid #e0e0e0;border-radius:15px;
+  padding:15px 10px;font-size:1rem;font-weight:700;color:#333;
+  transition:all .16s;line-height:1.3;}
+.opt-btn:hover:not(:disabled){background:var(--bl);border-color:var(--blue);
+  color:var(--bd);transform:scale(1.03);}
+.opt-btn.ok  {background:var(--gl)!important;border-color:var(--green)!important;color:var(--gd)!important;}
+.opt-btn.bad {background:var(--rl)!important;border-color:var(--red)!important;  color:var(--red)!important;}
+.opt-btn:disabled{cursor:default;}
+
+/* ── FILL IN BLANK ─────────────────────────────── */
+.fill-wrap{display:flex;flex-direction:column;align-items:center;gap:12px;}
+.fill-input{font-family:var(--fh);font-size:1.6rem;text-align:center;
+  border:3px solid #ddd;border-radius:15px;padding:12px 22px;
+  width:100%;max-width:320px;outline:none;background:#fafafa;color:#333;
+  transition:border-color .18s,background .18s;}
+.fill-input:focus{border-color:var(--blue);background:#fff;
+  box-shadow:0 0 0 3px var(--bl);}
+.fill-input.ok  {border-color:var(--green);background:var(--gl);}
+.fill-input.bad {border-color:var(--red);  background:var(--rl);animation:shake .3s ease;}
+
+/* ── FEEDBACK ──────────────────────────────────── */
+.feedback{margin-top:14px;padding:11px 20px;border-radius:13px;
+  font-weight:700;font-size:1rem;min-height:44px;transition:all .2s;}
+.feedback.ok {background:var(--gl);color:var(--gd);}
+.feedback.bad{background:var(--rl);color:var(--red);}
+
+.btn-next{margin-top:14px;background:var(--orange);color:#fff;border-radius:100px;
+  padding:13px 42px;font-size:1.05rem;font-weight:800;display:none;
+  box-shadow:0 4px 14px rgba(230,126,34,.3);transition:all .16s;
+  animation:popIn .3s ease;}
+.btn-next.show{display:inline-block;}
+.btn-next:hover{background:var(--od);transform:scale(1.04);}
+
+/* ── TIMER ─────────────────────────────────────── */
+#timerRing{position:fixed;bottom:22px;right:22px;z-index:50;
+  width:56px;height:56px;}
+#timerRing svg{transform:rotate(-90deg);}
+#timerRing circle{fill:none;stroke-width:5;}
+.t-bg{stroke:#e0e0e0;}
+.t-fg{transition:stroke-dashoffset .95s linear;}
+.t-num{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-family:var(--fh);font-size:1.15rem;color:#333;}
+
+/* ── TIMEOUT OVERLAY ───────────────────────────── */
+#toOverlay{position:fixed;inset:0;background:rgba(0,0,0,.55);
+  display:none;align-items:center;justify-content:center;z-index:200;}
+#toOverlay.show{display:flex;}
+.to-box{background:var(--w);border-radius:var(--r);padding:38px 32px;
+  text-align:center;animation:popIn .3s ease;max-width:340px;width:90%;}
+.to-box .to-ico{font-size:3.2rem;margin-bottom:8px;}
+.to-box h3{font-family:var(--fh);font-size:1.9rem;color:var(--red);margin-bottom:8px;}
+.to-box p{color:#666;margin-bottom:22px;font-size:.98rem;}
+
+/* ── RESULTS ───────────────────────────────────── */
+#results{justify-content:center;
+  background:radial-gradient(ellipse at 20% 0%,#d5f5e3,transparent 55%),
+             radial-gradient(ellipse at 80% 100%,#d6eaf8,transparent 55%),
+             var(--bg);}
+.res-card{background:var(--w);border-radius:28px;box-shadow:var(--sh);
+  padding:42px 32px;text-align:center;max-width:460px;width:100%;
+  animation:popIn .4s cubic-bezier(.34,1.56,.64,1);}
+.res-emo{font-size:3.8rem;margin-bottom:4px;}
+.res-card h2{font-family:var(--fh);font-size:2.1rem;margin:8px 0 4px;}
+.res-score{font-family:var(--fh);font-size:4.2rem;color:var(--orange);margin:8px 0;}
+.res-stars{display:flex;justify-content:center;gap:8px;margin:6px 0 18px;}
+.res-stars span{font-size:2.4rem;display:inline-block;opacity:0;}
+.res-stars span.lit{animation:starPop .4s ease forwards;}
+.res-msg{color:#666;font-size:1rem;margin-bottom:28px;line-height:1.5;}
+.res-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+
+/* ── CONFETTI ──────────────────────────────────── */
+.conf{position:fixed;top:-16px;pointer-events:none;z-index:9999;
+  border-radius:2px;animation:confFall linear forwards;}
+
+/* ── RESPONSIVE ────────────────────────────────── */
+@media(max-width:500px){
+  .opts-grid{grid-template-columns:1fr;}
+  .q-card{padding:20px 14px 18px;}
+  .lbox{width:42px;height:50px;font-size:1.5rem;}
+  .res-card{padding:28px 16px;}
+  .emoji-stage{height:170px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════
+     HOME
+══════════════════════════════════════════════ -->
+<div id="home" class="screen active">
+  <div class="home-head">
+    <div class="dino-hero">🦖</div>
+    <h1>Dino Learn</h1>
+    <p>¡Aprendé jugando con los dinosaurios! 🌟</p>
+  </div>
+  <div class="cat-grid">
+    <div class="cat-card ce" onclick="openCategory('english')">
+      <span class="icon">🇬🇧</span>
+      <h2>English</h2>
+      <p>Completá palabras en inglés letra por letra</p>
+      <span class="cat-chip">Spell it!</span>
+    </div>
+    <div class="cat-card cm" onclick="openCategory('math')">
+      <span class="icon">🔢</span>
+      <h2>Matemáticas</h2>
+      <p>Sumas, restas, multiplicación y división</p>
+      <span class="cat-chip">¡A calcular!</span>
+    </div>
+    <div class="cat-card cl" onclick="openCategory('lengua')">
+      <span class="icon">📝</span>
+      <h2>Lengua</h2>
+      <p>Ortografía, sinónimos, tildes y frases</p>
+      <span class="cat-chip">¡A escribir!</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     MODULE SELECT
+══════════════════════════════════════════════ -->
+<div id="moduleSelect" class="screen">
+  <div class="dino-hero" id="modDino" style="margin-bottom:12px;">🦕</div>
+  <h2 class="page-title" id="modTitle">Elegí un módulo</h2>
+  <p class="page-sub" id="modSub">¿Qué querés practicar hoy?</p>
+  <div class="mod-grid" id="modGrid"></div>
+  <button class="btn-back" onclick="show('home')">← Inicio</button>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     LEVEL SELECT  (sólo Matemáticas)
+══════════════════════════════════════════════ -->
+<div id="levelSelect" class="screen">
+  <div class="dino-hero" style="margin-bottom:12px;">🦴</div>
+  <h2 class="page-title" id="lvTitle">Elegí el nivel</h2>
+  <p class="page-sub">¿Cuánto te querés desafiar?</p>
+  <div class="lv-grid">
+    <div class="lv-card easy"   onclick="startGame('easy')">
+      <div class="li">🌱</div><h3>Fácil</h3><small>Números pequeños</small>
+    </div>
+    <div class="lv-card medium" onclick="startGame('medium')">
+      <div class="li">⚡</div><h3>Medio</h3><small>Un poco más difícil</small>
+    </div>
+    <div class="lv-card hard"   onclick="startGame('hard')">
+      <div class="li">🔥</div><h3>Difícil</h3><small>¡Para valientes!</small>
+    </div>
+  </div>
+  <button class="btn-back" id="lvBack">← Volver</button>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     GAME
+══════════════════════════════════════════════ -->
+<div id="game" class="screen">
+  <div class="game-topbar">
+    <button class="btn-back" style="margin-top:0;padding:8px 18px;font-size:.9rem;"
+      onclick="confirmBack()">🗺️ Mapa</button>
+    <span class="game-label" id="gameLabel">Dino Learn</span>
+    <span class="score-pill">⭐ <span id="scoreNum">0</span></span>
+  </div>
+  <div class="prog-wrap">
+    <div class="prog-fill" id="progFill" style="width:0%"></div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-num"  id="qNum">Pregunta 1 de 10</div>
+    <div class="q-dino" id="qDino">🦖</div>
+
+    <!-- English: letra por letra -->
+    <div id="areaSpell" style="display:none">
+      <div class="emoji-stage" id="spellEmoji" role="img" aria-label="imagen"></div>
+      <div class="spell-hint"  id="spellHint"></div>
+      <div class="letter-row"  id="letterRow"></div>
+      <button class="btn-verify" onclick="checkSpell()">✓ Verificar</button>
+    </div>
+
+    <!-- Opción múltiple -->
+    <div id="areaChoice" style="display:none">
+      <div class="q-text"  id="qText"></div>
+      <div class="opts-grid" id="optsGrid"></div>
+    </div>
+
+    <!-- Completar frase -->
+    <div id="areaFill" style="display:none">
+      <div class="q-text" id="fillText"></div>
+      <div class="fill-wrap">
+        <input class="fill-input" id="fillInput" type="text"
+          placeholder="Escribí la palabra…" autocomplete="off"
+          autocorrect="off" autocapitalize="off" spellcheck="false">
+        <button class="btn-verify" onclick="checkFill()">✓ Verificar</button>
+      </div>
+    </div>
+
+    <div class="feedback" id="feedbackEl"></div>
+    <button class="btn-next" id="btnNext" onclick="nextQ()">Siguiente →</button>
+  </div><!-- /q-card -->
+</div><!-- /game -->
+
+<!-- ── Timer ring (fixed) ─────────────── -->
+<div id="timerRing">
+  <svg width="56" height="56" viewBox="0 0 56 56">
+    <circle class="t-bg" cx="28" cy="28" r="23"/>
+    <circle class="t-fg" id="tCircle" cx="28" cy="23" r="23"
+      stroke-dasharray="144.5" stroke-dashoffset="0" stroke="var(--green)"/>
+  </svg>
+  <span class="t-num" id="tNum">10</span>
+</div>
+
+<!-- ── Timeout overlay ───────────────── -->
+<div id="toOverlay">
+  <div class="to-box">
+    <div class="to-ico">⏰</div>
+    <h3>¡Tiempo!</h3>
+    <p id="toAnswer">La respuesta era: …</p>
+    <button class="btn-green" onclick="closeTimeout()">Continuar →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     RESULTS
+══════════════════════════════════════════════ -->
+<div id="results" class="screen">
+  <div class="res-card">
+    <div class="res-emo" id="resEmo">🦖</div>
+    <h2 id="resTitle">¡Terminaste!</h2>
+    <div class="res-score" id="resScore">0/10</div>
+    <div class="res-stars" id="resStars">
+      <span>⭐</span><span>⭐</span><span>⭐</span>
+    </div>
+    <p class="res-msg" id="resMsg"></p>
+    <div class="res-btns">
+      <button class="btn-green" onclick="replaySame()">🔄 Jugar de nuevo</button>
+      <button class="btn-ghost" onclick="show('home')">🏠 Inicio</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+/* ─────────────────────────────────────────────────
+   SOUND ENGINE
+───────────────────────────────────────────────── */
+let AC;
+function getAC(){
+  if(!AC) AC = new (window.AudioContext||window.webkitAudioContext)();
+  if(AC.state==='suspended') AC.resume();
+  return AC;
+}
+function beep(freq, dur, type='sine', vol=.28){
+  try{
+    const ac=getAC(), o=ac.createOscillator(), g=ac.createGain();
+    o.type=type; o.frequency.value=freq;
+    g.gain.setValueAtTime(vol,ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+dur);
+    o.connect(g); g.connect(ac.destination);
+    o.start(); o.stop(ac.currentTime+dur);
+  }catch(e){}
+}
+const snd={
+  correct(){ beep(523,.1); setTimeout(()=>beep(659,.1),110); setTimeout(()=>beep(784,.22),220); },
+  wrong()  { beep(220,.14,'sawtooth',.22); setTimeout(()=>beep(160,.28,'sawtooth',.22),140); },
+  timeout(){ beep(350,.18,'square',.2); setTimeout(()=>beep(260,.36,'square',.2),180); },
+  win()    { [523,587,659,784,1047].forEach((f,i)=>setTimeout(()=>beep(f,.2),i*110)); }
+};
+
+/* ─────────────────────────────────────────────────
+   SCREEN HELPER
+───────────────────────────────────────────────── */
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/* ─────────────────────────────────────────────────
+   GAME STATE
+───────────────────────────────────────────────── */
+let CAT='', MOD='', LVL='easy';
+let questions=[], qIdx=0, score=0;
+let timerID=null, timeLeft=10;
+const TOTAL=10;
+
+/* ─────────────────────────────────────────────────
+   DATA — ENGLISH
+───────────────────────────────────────────────── */
+const ENGLISH = {
+  colors:{
+    label:'🎨 Colores', dino:'🦕',
+    words:[
+      {w:'RED',    e:'🔴', h:'Color rojo'},
+      {w:'BLUE',   e:'🔵', h:'Color azul'},
+      {w:'GREEN',  e:'🟢', h:'Color verde'},
+      {w:'YELLOW', e:'🟡', h:'Color amarillo'},
+      {w:'ORANGE', e:'🟠', h:'Color naranja'},
+      {w:'PURPLE', e:'🟣', h:'Color morado'},
+      {w:'WHITE',  e:'⬜', h:'Color blanco'},
+      {w:'BLACK',  e:'⬛', h:'Color negro'},
+      {w:'PINK',   e:'🩷', h:'Color rosa'},
+      {w:'BROWN',  e:'🟫', h:'Color marrón'},
+      {w:'GRAY',   e:'🩶', h:'Color gris'},
+      {w:'GOLD',   e:'🌟', h:'Color dorado'},
+    ]
+  },
+  animals:{
+    label:'🐾 Animales', dino:'🦎',
+    words:[
+      {w:'CAT',      e:'🐱', h:'Dice miau'},
+      {w:'DOG',      e:'🐶', h:'Dice guau'},
+      {w:'FISH',     e:'🐟', h:'Vive en el agua'},
+      {w:'BIRD',     e:'🐦', h:'Vuela por el cielo'},
+      {w:'LION',     e:'🦁', h:'El rey de la selva'},
+      {w:'DUCK',     e:'🦆', h:'Nada en el estanque'},
+      {w:'FROG',     e:'🐸', h:'Salta y croac'},
+      {w:'BEAR',     e:'🐻', h:'Duerme en invierno'},
+      {w:'HORSE',    e:'🐴', h:'Animal para montar'},
+      {w:'RABBIT',   e:'🐰', h:'Tiene orejas largas'},
+      {w:'ELEPHANT', e:'🐘', h:'Tiene trompa'},
+      {w:'PENGUIN',  e:'🐧', h:'Vive en la Antártida'},
+      {w:'MONKEY',   e:'🐒', h:'Le gustan los plátanos'},
+      {w:'TIGER',    e:'🐯', h:'Tiene rayas negras'},
+      {w:'DOLPHIN',  e:'🐬', h:'Mamífero marino'},
+      {w:'COW',      e:'🐮', h:'Nos da leche'},
+      {w:'PIG',      e:'🐷', h:'Color rosado'},
+      {w:'SHEEP',    e:'🐑', h:'Tiene lana'},
+    ]
+  },
+  food:{
+    label:'🍎 Comida', dino:'🦕',
+    words:[
+      {w:'APPLE',   e:'🍎', h:'Fruta roja o verde'},
+      {w:'BANANA',  e:'🍌', h:'Fruta amarilla y larga'},
+      {w:'PIZZA',   e:'🍕', h:'Comida italiana'},
+      {w:'CAKE',    e:'🎂', h:'Para los cumpleaños'},
+      {w:'BREAD',   e:'🍞', h:'Lo hacemos al horno'},
+      {w:'MILK',    e:'🥛', h:'Bebida blanca'},
+      {w:'EGG',     e:'🥚', h:'Lo pone la gallina'},
+      {w:'GRAPE',   e:'🍇', h:'Fruta en racimos'},
+      {w:'CARROT',  e:'🥕', h:'Vegetal naranja'},
+      {w:'COOKIE',  e:'🍪', h:'Galletita dulce'},
+      {w:'MANGO',   e:'🥭', h:'Fruta tropical'},
+      {w:'LEMON',   e:'🍋', h:'Ácida y amarilla'},
+      {w:'RICE',    e:'🍚', h:'Grano blanco'},
+      {w:'CORN',    e:'🌽', h:'Vegetal amarillo'},
+      {w:'CHEESE',  e:'🧀', h:'Se hace con leche'},
+    ]
+  },
+  numbers:{
+    label:'🔢 Números', dino:'🦴',
+    words:[
+      {w:'ONE',    e:'1️⃣', h:'El número 1'},
+      {w:'TWO',    e:'2️⃣', h:'El número 2'},
+      {w:'THREE',  e:'3️⃣', h:'El número 3'},
+      {w:'FOUR',   e:'4️⃣', h:'El número 4'},
+      {w:'FIVE',   e:'5️⃣', h:'El número 5'},
+      {w:'SIX',    e:'6️⃣', h:'El número 6'},
+      {w:'SEVEN',  e:'7️⃣', h:'El número 7'},
+      {w:'EIGHT',  e:'8️⃣', h:'El número 8'},
+      {w:'NINE',   e:'9️⃣', h:'El número 9'},
+      {w:'TEN',    e:'🔟', h:'El número 10'},
+      {w:'ELEVEN', e:'🔢', h:'El número 11'},
+      {w:'TWELVE', e:'🔢', h:'El número 12'},
+    ]
+  }
+};
+
+/* ─────────────────────────────────────────────────
+   DATA — MATH
+───────────────────────────────────────────────── */
+const MATH_RANGES = {
+  sumas:  { easy:[1,10],  medium:[10,50],  hard:[30,200] },
+  restas: { easy:[1,10],  medium:[10,50],  hard:[30,200] },
+  multi:  { easy:[1,5],   medium:[2,10],   hard:[5,15]   },
+  div:    { easy:[1,5],   medium:[2,10],   hard:[3,12]   },
+};
+
+function rnd(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+
+function genMath(mod, lv){
+  const qs=[], [lo,hi]=MATH_RANGES[mod][lv];
+  const seen=new Set();
+  let tries=0;
+  while(qs.length<TOTAL && tries<300){
+    tries++;
+    let a,b,ans,key;
+    if(mod==='sumas'){
+      a=rnd(lo,hi); b=rnd(lo,hi); ans=a+b; key=`${a}+${b}`;
+    } else if(mod==='restas'){
+      a=rnd(lo,hi); b=rnd(lo,a);  ans=a-b; key=`${a}-${b}`;
+    } else if(mod==='multi'){
+      a=rnd(lo,hi); b=rnd(lo,hi); ans=a*b; key=`${a}x${b}`;
+    } else {
+      b=rnd(lo,hi)||1; ans=rnd(lo,hi); a=b*ans; key=`${a}/${b}`;
+    }
+    if(seen.has(key)) continue;
+    seen.add(key);
+    const sym = mod==='sumas'?'+': mod==='restas'?'−': mod==='multi'?'×':'÷';
+    const wrong=new Set();
+    const spread=Math.max(3,Math.ceil(ans*.25));
+    while(wrong.size<3){
+      const w=ans+rnd(-spread,spread);
+      if(w!==ans && w>=0) wrong.add(w);
+    }
+    qs.push({type:'choice', q:`${a} ${sym} ${b} = ?`, answer:String(ans),
+      opts:shuffle([ans,...wrong]).map(String)});
+  }
+  return qs;
+}
+
+/* ─────────────────────────────────────────────────
+   DATA — LENGUA
+───────────────────────────────────────────────── */
+const LENGUA = {
+  ortografia:{
+    label:'✍️ Ortografía', dino:'🦎',
+    pool:[
+      {type:'choice',q:'¿Cuál se escribe con Z?',         answer:'Zapato',    opts:['Sapato','Zapato','Capato','Xapato']},
+      {type:'choice',q:'¿Cuál se escribe con H?',         answer:'Huevo',     opts:['Uevo','Wevo','Huevo','Güevo']},
+      {type:'choice',q:'¿Cuál lleva MB?',                 answer:'Tambor',    opts:['Tanbor','Tambor','Tanvor','Tamvor']},
+      {type:'choice',q:'¿Cuál se escribe con C?',         answer:'Cielo',     opts:['Sielo','Zielo','Cielo','Xielo']},
+      {type:'choice',q:'¿Cuál se escribe con G?',         answer:'Girasol',   opts:['Jirasol','Girasol','Hirasol','Yirasol']},
+      {type:'choice',q:'¿Cuál se escribe con J?',         answer:'Jardín',    opts:['Gardín','Yardín','Jardín','Hardín']},
+      {type:'choice',q:'¿Cuál lleva H al inicio?',        answer:'Hormiga',   opts:['Ormiga','Hormiga','Jormiga','Wormiga']},
+      {type:'choice',q:'¿Cuál se escribe con Z?',         answer:'Corazón',   opts:['Corasón','Coracón','Corazón','Coraxón']},
+      {type:'choice',q:'¿Cuál lleva MB?',                 answer:'Sombrero',  opts:['Sonbrero','Sombrero','Somvrero','Sonvrero']},
+      {type:'choice',q:'¿Cuál se escribe con C (no S)?',  answer:'Cereza',    opts:['Sereza','Cereza','Zereza','Xereza']},
+      {type:'choice',q:'¿Cuál lleva H?',                  answer:'Helado',    opts:['Elado','Helado','Jelado','Welado']},
+      {type:'choice',q:'¿Cuál se escribe con G?',         answer:'Gato',      opts:['Jato','Hato','Gato','Yato']},
+      {type:'choice',q:'¿Cuál se escribe con J?',         answer:'Jirafa',    opts:['Girafa','Hirafa','Jirafa','Yirafa']},
+      {type:'choice',q:'¿Cuál lleva MB?',                 answer:'Cambia',    opts:['Canbia','Cambia','Cavbia','Canvia']},
+      {type:'choice',q:'¿Cuál se escribe con Z?',         answer:'Lápiz',     opts:['Lápis','Lápic','Lápiz','Lápix']},
+      {type:'choice',q:'¿Cuál lleva H?',                  answer:'Hoja',      opts:['Oja','Hoja','Yoja','Woja']},
+    ]
+  },
+  sinonimos:{
+    label:'🔄 Sinónimos y Antónimos', dino:'🦕',
+    pool:[
+      {type:'choice',q:'Sinónimo de "feliz"',      answer:'Contento',   opts:['Triste','Contento','Enojado','Cansado']},
+      {type:'choice',q:'Antónimo de "grande"',     answer:'Pequeño',    opts:['Enorme','Gigante','Pequeño','Ancho']},
+      {type:'choice',q:'Sinónimo de "rápido"',     answer:'Veloz',      opts:['Lento','Veloz','Tranquilo','Pesado']},
+      {type:'choice',q:'Antónimo de "día"',        answer:'Noche',      opts:['Tarde','Amanecer','Noche','Mañana']},
+      {type:'choice',q:'Sinónimo de "bonito"',     answer:'Hermoso',    opts:['Feo','Horrible','Hermoso','Oscuro']},
+      {type:'choice',q:'Antónimo de "frío"',       answer:'Caliente',   opts:['Tibio','Fresco','Helado','Caliente']},
+      {type:'choice',q:'Sinónimo de "comenzar"',   answer:'Iniciar',    opts:['Terminar','Parar','Iniciar','Frenar']},
+      {type:'choice',q:'Antónimo de "lleno"',      answer:'Vacío',      opts:['Ocupado','Repleto','Abundante','Vacío']},
+      {type:'choice',q:'Sinónimo de "miedo"',      answer:'Terror',     opts:['Alegría','Valor','Terror','Amor']},
+      {type:'choice',q:'Antónimo de "arriba"',     answer:'Abajo',      opts:['Adelante','Adentro','Abajo','Atrás']},
+      {type:'choice',q:'Sinónimo de "hablar"',     answer:'Conversar',  opts:['Callar','Escuchar','Conversar','Dormir']},
+      {type:'choice',q:'Antónimo de "luz"',        answer:'Oscuridad',  opts:['Brillo','Resplandor','Oscuridad','Destello']},
+      {type:'choice',q:'Sinónimo de "casa"',       answer:'Hogar',      opts:['Escuela','Parque','Hogar','Bosque']},
+      {type:'choice',q:'Antónimo de "fuerte"',     answer:'Débil',      opts:['Potente','Robusto','Débil','Sólido']},
+      {type:'choice',q:'Sinónimo de "caminar"',    answer:'Andar',      opts:['Correr','Saltar','Andar','Flotar']},
+      {type:'choice',q:'Antónimo de "nuevo"',      answer:'Viejo',      opts:['Moderno','Fresco','Reciente','Viejo']},
+    ]
+  },
+  tildes:{
+    label:'´ Palabras con Tilde', dino:'🦎',
+    pool:[
+      {type:'choice',q:'¿Cuál lleva tilde?',            answer:'Árbol',    opts:['Arbol','Árbol','Arból','Arboll']},
+      {type:'choice',q:'¿Cuál está bien acentuada?',    answer:'Camión',   opts:['Camion','Camioon','Camión','Camiòn']},
+      {type:'choice',q:'¿Qué palabra lleva tilde?',     answer:'Música',   opts:['Musica','Música','Müsica','Musíca']},
+      {type:'choice',q:'¿Cuál lleva tilde?',            answer:'Teléfono', opts:['Telefono','Teléfono','Telèfono','Telefonó']},
+      {type:'choice',q:'¿Cuál es aguda con tilde?',     answer:'Mamá',     opts:['Mama','Mamá','Màma','Mamaa']},
+      {type:'choice',q:'¿Cuál lleva tilde?',            answer:'Café',     opts:['Cafe','Cafè','Café','Caffe']},
+      {type:'choice',q:'¿Cuál está bien escrita?',      answer:'Pájaro',   opts:['Pajaro','Pájaro','Pajáro','Pajarro']},
+      {type:'choice',q:'¿Cuál lleva tilde?',            answer:'Corazón',  opts:['Corazon','Córazon','Corazón','Corrazon']},
+      {type:'choice',q:'¿Cuál es esdrújula?',           answer:'Rápido',   opts:['Rapido','Rápido','Rapído','Rrápido']},
+      {type:'choice',q:'¿Cuál lleva tilde?',            answer:'Médico',   opts:['Medico','Médico','Médicoo','Medicó']},
+      {type:'choice',q:'¿Cuál lleva tilde?',            answer:'Número',   opts:['Numero','Número','Numéro','Numbero']},
+      {type:'choice',q:'¿Cuál lleva tilde?',            answer:'Océano',   opts:['Oceano','Ocèano','Océano','Occeano']},
+      {type:'choice',q:'¿Cuál lleva tilde?',            answer:'Sábado',   opts:['Sabado','Sábado','Sabádo','Sabbado']},
+      {type:'choice',q:'¿Cuál lleva tilde?',            answer:'Lápiz',    opts:['Lapiz','Lápiz','Lapíz','Lapizz']},
+      {type:'choice',q:'¿Cuál lleva tilde?',            answer:'Azúcar',   opts:['Azucar','Azúcar','Azucár','Azzucar']},
+      {type:'choice',q:'¿Cuál lleva tilde?',            answer:'Fútbol',   opts:['Futbol','Fútbol','Futból','Futboll']},
+    ]
+  },
+  frases:{
+    label:'💬 Completar Frases', dino:'🦕',
+    pool:[
+      {type:'fill', q:'El ___ brilla de noche en el cielo.',           answer:'luna'},
+      {type:'fill', q:'El ___ es el rey de la selva.',                  answer:'leon'},
+      {type:'fill', q:'Los niños toman ___ con el desayuno.',           answer:'leche'},
+      {type:'fill', q:'Las hojas de los árboles son ___.',              answer:'verdes'},
+      {type:'fill', q:'El ___ nos da luz y calor todos los días.',      answer:'sol'},
+      {type:'fill', q:'Los pájaros tienen ___ para volar.',             answer:'alas'},
+      {type:'fill', q:'El ___ es el mejor amigo del hombre.',           answer:'perro'},
+      {type:'fill', q:'Los peces viven en el ___.',                     answer:'agua'},
+      {type:'fill', q:'En invierno hace mucho ___.',                    answer:'frio'},
+      {type:'fill', q:'Los niños estudian en la ___.',                  answer:'escuela'},
+      {type:'fill', q:'El ___ es un animal con trompa enorme.',         answer:'elefante'},
+      {type:'fill', q:'La ___ tiene pétalos y un lindo perfume.',       answer:'flor'},
+      {type:'fill', q:'Comemos con cuchara y ___.',                     answer:'tenedor'},
+      {type:'fill', q:'La ___ es blanca y cae en invierno.',            answer:'nieve'},
+      {type:'fill', q:'El gato dice ___ cuando quiere comida.',         answer:'miau'},
+      {type:'fill', q:'Usamos ___ para ver cuando oscurece.',           answer:'luz'},
+    ]
+  }
+};
+
+/* ─────────────────────────────────────────────────
+   MODULE CONFIG (menus)
+───────────────────────────────────────────────── */
+const CATEGORIES = {
+  english:{
+    title:'🇬🇧 English', sub:'Completá la palabra letra por letra', dino:'🦕',
+    mods:[
+      {id:'colors',  name:'Colores',  icon:'🎨', sub:'Colores en inglés'},
+      {id:'animals', name:'Animales', icon:'🐾', sub:'Animales en inglés'},
+      {id:'food',    name:'Comida',   icon:'🍎', sub:'Alimentos en inglés'},
+      {id:'numbers', name:'Números',  icon:'🔢', sub:'Números en inglés'},
+    ]
+  },
+  math:{
+    title:'🔢 Matemáticas', sub:'Elegí la operación', dino:'🦴',
+    mods:[
+      {id:'sumas',  name:'Sumas',          icon:'➕', sub:'Operaciones de suma'},
+      {id:'restas', name:'Restas',         icon:'➖', sub:'Operaciones de resta'},
+      {id:'multi',  name:'Multiplicación', icon:'✖️', sub:'Tablas de multiplicar'},
+      {id:'div',    name:'División',       icon:'➗', sub:'Divisiones exactas'},
+    ]
+  },
+  lengua:{
+    title:'📝 Lengua', sub:'Elegí un módulo', dino:'🦎',
+    mods:[
+      {id:'ortografia', name:'Ortografía',          icon:'✍️', sub:'S/C/Z · H · MB · G/J'},
+      {id:'sinonimos',  name:'Sinónimos/Antónimos',  icon:'🔄', sub:'Elegí la opción correcta'},
+      {id:'tildes',     name:'Tildes',               icon:'´',  sub:'¿Cuál lleva tilde?'},
+      {id:'frases',     name:'Completar Frases',     icon:'💬', sub:'Escribí la palabra que falta'},
+    ]
+  }
+};
+
+/* ─────────────────────────────────────────────────
+   SHUFFLE
+───────────────────────────────────────────────── */
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+/* ─────────────────────────────────────────────────
+   NAVIGATION
+───────────────────────────────────────────────── */
+function openCategory(cat){
+  CAT=cat;
+  const cfg=CATEGORIES[cat];
+  document.getElementById('modDino').textContent=cfg.dino;
+  document.getElementById('modTitle').textContent=cfg.title;
+  document.getElementById('modSub').textContent=cfg.sub;
+  const grid=document.getElementById('modGrid');
+  grid.innerHTML='';
+  cfg.mods.forEach(m=>{
+    const d=document.createElement('div');
+    d.className='mod-card';
+    d.innerHTML=`<div class="mi">${m.icon}</div><h3>${m.name}</h3><small>${m.sub}</small>`;
+    d.onclick=()=>selectMod(m.id);
+    grid.appendChild(d);
+  });
+  show('moduleSelect');
+}
+
+function selectMod(mod){
+  MOD=mod;
+  if(CAT==='math'){
+    const mInfo=CATEGORIES.math.mods.find(m=>m.id===mod);
+    document.getElementById('lvTitle').textContent=`${mInfo.icon} ${mInfo.name}`;
+    document.getElementById('lvBack').onclick=()=>openCategory('math');
+    show('levelSelect');
+  } else {
+    LVL='easy';
+    startGame();
+  }
+}
+
+function startGame(lv){
+  if(lv) LVL=lv;
+  score=0; qIdx=0;
+  questions=buildQuestions();
+  const catLabel={english:'🇬🇧 English',math:'🔢 Matemáticas',lengua:'📝 Lengua'};
+  document.getElementById('gameLabel').textContent=catLabel[CAT];
+  show('game');
+  renderQ();
+}
+
+/* ─────────────────────────────────────────────────
+   BUILD QUESTIONS
+───────────────────────────────────────────────── */
+function buildQuestions(){
+  if(CAT==='english'){
+    return shuffle(ENGLISH[MOD].words)
+      .slice(0,TOTAL)
+      .map(w=>({type:'spell', word:w.w, emoji:w.e, hint:w.h}));
+  }
+  if(CAT==='math'){
+    return genMath(MOD, LVL);
+  }
+  // lengua
+  return shuffle([...LENGUA[MOD].pool]).slice(0,TOTAL);
+}
+
+/* ─────────────────────────────────────────────────
+   RENDER QUESTION
+───────────────────────────────────────────────── */
+function renderQ(){
+  stopTimer();
+  const q=questions[qIdx];
+
+  // UI reset
+  document.getElementById('qNum').textContent=`Pregunta ${qIdx+1} de ${TOTAL}`;
+  document.getElementById('progFill').style.width=`${(qIdx/TOTAL)*100}%`;
+  document.getElementById('qDino').textContent='🦖';
+  document.getElementById('feedbackEl').textContent='';
+  document.getElementById('feedbackEl').className='feedback';
+  document.getElementById('btnNext').classList.remove('show');
+  document.getElementById('scoreNum').textContent=score;
+
+  ['areaSpell','areaChoice','areaFill'].forEach(id=>{
+    document.getElementById(id).style.display='none';
+  });
+
+  if(q.type==='spell')  { document.getElementById('areaSpell').style.display='block';  renderSpell(q); }
+  else if(q.type==='choice'){ document.getElementById('areaChoice').style.display='block'; renderChoice(q); }
+  else                  { document.getElementById('areaFill').style.display='block';   renderFill(q); }
+
+  startTimer();
+}
+
+/* ── SPELL ────────────────────────────── */
+function renderSpell(q){
+  const stage=document.getElementById('spellEmoji');
+  stage.textContent=q.emoji;
+  stage.setAttribute('aria-label', q.hint);
+  document.getElementById('spellHint').textContent=q.hint;
+
+  const row=document.getElementById('letterRow');
+  row.innerHTML='';
+  q.word.split('').forEach((ch,i)=>{
+    const inp=document.createElement('input');
+    inp.className='lbox';
+    inp.maxLength=1;
+    inp.type='text';
+    inp.inputMode='text';
+    inp.autocomplete='off';
+    inp.autocorrect='off';
+    inp.autocapitalize='characters';
+    inp.spellcheck=false;
+    inp.dataset.i=i;
+    inp.oninput=e=>{
+      e.target.value=e.target.value.replace(/[^a-zA-Z]/g,'').toUpperCase().slice(0,1);
+      if(e.target.value) focusBox(i+1);
+    };
+    inp.onkeydown=e=>{
+      if(e.key==='Backspace'&&!e.target.value) focusBox(i-1);
+      if(e.key==='Enter') checkSpell();
+    };
+    row.appendChild(inp);
+  });
+  focusBox(0);
+}
+function focusBox(i){
+  const boxes=[...document.querySelectorAll('.lbox')];
+  if(boxes[i]) boxes[i].focus();
+}
+function checkSpell(){
+  stopTimer();
+  const q=questions[qIdx];
+  const boxes=[...document.querySelectorAll('.lbox')];
+  let allOk=true;
+  boxes.forEach((b,i)=>{
+    const isOk=b.value.toUpperCase()===(q.word[i]||'').toUpperCase();
+    b.classList.add(isOk?'ok':'bad');
+    b.disabled=true;
+    if(!isOk) allOk=false;
+  });
+  if(allOk){ score++; snd.correct(); feedback(true); }
+  else      { snd.wrong();  feedback(false, q.word); }
+  showNext();
+}
+
+/* ── CHOICE ───────────────────────────── */
+function renderChoice(q){
+  document.getElementById('qText').textContent=q.q;
+  const grid=document.getElementById('optsGrid');
+  grid.innerHTML='';
+  shuffle([...q.opts]).forEach(opt=>{
+    const b=document.createElement('button');
+    b.className='opt-btn';
+    b.textContent=opt;
+    b.onclick=()=>pickOpt(b,opt,q.answer);
+    grid.appendChild(b);
+  });
+}
+function pickOpt(btn,chosen,correct){
+  stopTimer();
+  document.querySelectorAll('.opt-btn').forEach(b=>b.disabled=true);
+  if(chosen===correct){
+    btn.classList.add('ok'); score++; snd.correct(); feedback(true);
+  } else {
+    btn.classList.add('bad');
+    document.querySelectorAll('.opt-btn').forEach(b=>{
+      if(b.textContent===correct) b.classList.add('ok');
+    });
+    snd.wrong(); feedback(false, correct);
+  }
+  showNext();
+}
+
+/* ── FILL ─────────────────────────────── */
+function renderFill(q){
+  document.getElementById('fillText').textContent=q.q;
+  const inp=document.getElementById('fillInput');
+  inp.value=''; inp.className='fill-input'; inp.disabled=false;
+  inp.onkeydown=e=>{ if(e.key==='Enter') checkFill(); };
+  setTimeout(()=>inp.focus(),60);
+}
+function checkFill(){
+  stopTimer();
+  const inp=document.getElementById('fillInput');
+  const norm=s=>s.trim().toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const val=norm(inp.value);
+  const ans=norm(questions[qIdx].answer);
+  inp.disabled=true;
+  if(val===ans){
+    inp.classList.add('ok'); score++; snd.correct(); feedback(true);
+  } else {
+    inp.classList.add('bad');
+    snd.wrong(); feedback(false, questions[qIdx].answer);
+  }
+  showNext();
+}
+
+/* ── FEEDBACK ─────────────────────────── */
+const PRAISE=['¡Excelente! 🎉','¡Correcto! 🌟','¡Muy bien! 🚀','¡Genial! 🏆','¡Perfecto! ✨','¡Increíble! 🦖'];
+function feedback(ok, ans=''){
+  const el=document.getElementById('feedbackEl');
+  const dino=document.getElementById('qDino');
+  if(ok){
+    el.textContent=PRAISE[Math.floor(Math.random()*PRAISE.length)];
+    el.className='feedback ok'; dino.textContent='🎉';
+  } else {
+    el.textContent=`Casi... La respuesta era: "${ans}"`;
+    el.className='feedback bad'; dino.textContent='😢';
+  }
+}
+function showNext(){ document.getElementById('btnNext').classList.add('show'); }
+
+/* ─────────────────────────────────────────────────
+   TIMER
+───────────────────────────────────────────────── */
+const CIRC_LEN=144.5;
+function startTimer(){
+  timeLeft=10;
+  updateTimer(10);
+  timerID=setInterval(()=>{
+    timeLeft--;
+    updateTimer(timeLeft);
+    if(timeLeft<=0){ clearInterval(timerID); onTimeout(); }
+  },1000);
+}
+function stopTimer(){ clearInterval(timerID); }
+function updateTimer(t){
+  document.getElementById('tNum').textContent=t;
+  const c=document.getElementById('tCircle');
+  c.style.strokeDashoffset=CIRC_LEN*(1-t/10);
+  c.style.stroke=t>5?'var(--green)':t>3?'var(--orange)':'var(--red)';
+  const ring=document.getElementById('timerRing');
+  ring.style.animation=t<=3?'tPulse .5s ease infinite':'none';
+}
+function onTimeout(){
+  snd.timeout();
+  const q=questions[qIdx];
+  const ans=q.answer||q.word||'';
+  document.querySelectorAll('.opt-btn,.lbox,.fill-input').forEach(b=>b.disabled=true);
+  document.getElementById('toAnswer').textContent=`La respuesta era: "${ans}"`;
+  document.getElementById('toOverlay').classList.add('show');
+}
+function closeTimeout(){
+  document.getElementById('toOverlay').classList.remove('show');
+  feedback(false, questions[qIdx].answer||questions[qIdx].word||'');
+  showNext();
+}
+
+/* ─────────────────────────────────────────────────
+   NEXT / RESULTS
+───────────────────────────────────────────────── */
+function nextQ(){
+  qIdx++;
+  if(qIdx>=TOTAL) showResults();
+  else renderQ();
+}
+
+function showResults(){
+  stopTimer();
+  document.getElementById('progFill').style.width='100%';
+  const pct=score/TOTAL;
+  const numStars=pct>=.9?3:pct>=.6?2:1;
+  const emos  =[['😢','¡No te rindas!'],['😊','¡Buen trabajo!'],['🏆','¡Sos un genio!']];
+  const msgs  =['Seguí practicando, cada intento te hace mejor.','¡Bien hecho! Con un poco más llegarás a las 3 estrellas.','¡Respondiste casi todo perfecto! Sos increíble.'];
+
+  document.getElementById('resEmo').textContent  =emos[numStars-1][0];
+  document.getElementById('resTitle').textContent=emos[numStars-1][1];
+  document.getElementById('resScore').textContent=`${score}/${TOTAL}`;
+  document.getElementById('resMsg').textContent  =msgs[numStars-1];
+
+  // animate stars
+  const spans=[...document.getElementById('resStars').querySelectorAll('span')];
+  spans.forEach((s,i)=>{
+    s.style.opacity='0'; s.classList.remove('lit');
+    if(i<numStars){
+      setTimeout(()=>{ s.style.opacity='1'; s.classList.add('lit'); },300+i*220);
+    }
+  });
+
+  show('results');
+  if(pct>=.6){ snd.win(); confetti(); }
+}
+
+function replaySame(){ startGame(LVL); }
+
+/* ─────────────────────────────────────────────────
+   CONFIRM BACK
+───────────────────────────────────────────────── */
+function confirmBack(){
+  stopTimer();
+  if(confirm('¿Querés volver al mapa? Se perderá el progreso actual.')){
+    show('home');
+  } else {
+    startTimer();
+  }
+}
+
+/* ─────────────────────────────────────────────────
+   CONFETTI
+───────────────────────────────────────────────── */
+function confetti(){
+  const colors=['#27AE60','#3498DB','#F39C12','#E74C3C','#9B59B6','#E67E22','#1ABC9C'];
+  for(let i=0;i<80;i++){
+    setTimeout(()=>{
+      const p=document.createElement('div');
+      p.className='conf';
+      const size=7+Math.random()*9;
+      p.style.cssText=
+        `left:${Math.random()*100}vw;`+
+        `background:${colors[~~(Math.random()*colors.length)]};`+
+        `width:${size}px;height:${size}px;`+
+        `border-radius:${Math.random()>.4?'50%':'3px'};`+
+        `animation-duration:${1.4+Math.random()*2}s;`;
+      document.body.appendChild(p);
+      setTimeout(()=>p.remove(),4500);
+    },i*32);
+  }
+}
+</script>
+</body>
+</html>
