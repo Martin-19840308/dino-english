@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dino Learn 🦖</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FFF9F0;
+    --green: #4CAF50;
+    --green-d: #388E3C;
+    --blue: #42A5F5;
+    --blue-d: #1976D2;
+    --orange: #FF8C42;
+    --orange-d: #E65100;
+    --purple: #AB47BC;
+    --purple-d: #6A1B9A;
+    --yellow: #FFD54F;
+    --yellow-d: #F9A825;
+    --red: #EF5350;
+    --red-d: #B71C1C;
+    --card: #fff;
+    --shadow: 0 6px 24px rgba(0,0,0,0.10);
+    --radius: 24px;
+    --font-title: 'Fredoka One', cursive;
+    --font-body: 'Nunito', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ====== SCREENS ====== */
+  .screen { display: none; min-height: 100vh; padding: 20px; flex-direction: column; align-items: center; }
+  .screen.active { display: flex; }
+
+  /* ====== FLOATING DINO ====== */
+  .dino-float {
+    font-size: 4rem;
+    animation: float 3s ease-in-out infinite;
+    display: inline-block;
+    filter: drop-shadow(0 8px 16px rgba(0,0,0,0.15));
+  }
+  @keyframes float {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-14px); }
+  }
+
+  /* ====== HOME ====== */
+  #home {
+    justify-content: center;
+    background: linear-gradient(160deg, #E8F5E9 0%, #FFF9F0 40%, #E3F2FD 100%);
+  }
+  .home-header { text-align: center; margin-bottom: 36px; }
+  .home-header h1 {
+    font-family: var(--font-title);
+    font-size: clamp(2.4rem, 6vw, 3.8rem);
+    color: #2E7D32;
+    letter-spacing: 1px;
+    margin-top: 10px;
+  }
+  .home-header p { font-size: 1.1rem; color: #555; margin-top: 6px; }
+
+  .category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 22px;
+    width: 100%;
+    max-width: 860px;
+  }
+  .cat-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 32px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform .18s, box-shadow .18s;
+    border: 3px solid transparent;
+    position: relative;
+    overflow: hidden;
+  }
+  .cat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+    border-radius: 24px 24px 0 0;
+  }
+  .cat-card.english::before { background: var(--green); }
+  .cat-card.math::before   { background: var(--blue); }
+  .cat-card.lengua::before { background: var(--purple); }
+
+  .cat-card:hover { transform: translateY(-6px) scale(1.03); box-shadow: 0 12px 36px rgba(0,0,0,0.15); }
+  .cat-card .cat-icon { font-size: 3.2rem; margin-bottom: 10px; }
+  .cat-card h2 { font-family: var(--font-title); font-size: 1.7rem; margin-bottom: 6px; }
+  .cat-card.english h2 { color: var(--green-d); }
+  .cat-card.math h2    { color: var(--blue-d); }
+  .cat-card.lengua h2  { color: var(--purple-d); }
+  .cat-card p { font-size: .95rem; color: #666; }
+  .cat-badge {
+    display: inline-block;
+    margin-top: 14px;
+    padding: 5px 16px;
+    border-radius: 100px;
+    font-size: .85rem;
+    font-weight: 700;
+    color: #fff;
+  }
+  .cat-card.english .cat-badge { background: var(--green); }
+  .cat-card.math .cat-badge    { background: var(--blue); }
+  .cat-card.lengua .cat-badge  { background: var(--purple); }
+
+  /* ====== LEVEL SELECT ====== */
+  #levelSelect { justify-content: center; }
+  .level-header { text-align: center; margin-bottom: 30px; }
+  .level-header h2 { font-family: var(--font-title); font-size: 2rem; }
+  .level-header p  { color: #666; margin-top: 4px; }
+  .level-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 18px;
+    width: 100%; max-width: 680px;
+  }
+  .level-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 28px 20px;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: transform .18s, box-shadow .18s;
+    border: 3px solid transparent;
+  }
+  .level-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.14); }
+  .level-card .lv-icon { font-size: 2.6rem; margin-bottom: 8px; }
+  .level-card h3 { font-family: var(--font-title); font-size: 1.4rem; }
+  .level-card p  { font-size: .88rem; color: #777; margin-top: 5px; }
+  .level-card.easy   { border-color: var(--green); }
+  .level-card.medium { border-color: var(--orange); }
+  .level-card.hard   { border-color: var(--red); }
+  .level-card.easy h3   { color: var(--green-d); }
+  .level-card.medium h3 { color: var(--orange-d); }
+  .level-card.hard h3   { color: var(--red-d); }
+  .btn-back {
+    margin-top: 24px;
+    background: #eee;
+    border: none;
+    border-radius: 100px;
+    padding: 10px 28px;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    color: #555;
+    transition: background .15s;
+  }
+  .btn-back:hover { background: #ddd; }
+
+  /* ====== GAME SCREEN ====== */
+  #game {
+    justify-content: flex-start;
+    padding-top: 28px;
+    align-items: center;
+  }
+  .game-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 680px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .game-title { font-family: var(--font-title); font-size: 1.4rem; }
+  .game-progress {
+    background: #eee;
+    border-radius: 100px;
+    height: 12px;
+    width: 100%;
+    max-width: 680px;
+    margin-bottom: 18px;
+    overflow: hidden;
+  }
+  .game-progress-bar {
+    height: 100%;
+    border-radius: 100px;
+    background: linear-gradient(90deg, var(--green), var(--yellow));
+    transition: width .4s ease;
+  }
+  .score-badge {
+    background: var(--yellow);
+    border-radius: 100px;
+    padding: 6px 18px;
+    font-weight: 800;
+    font-size: 1rem;
+    color: #5D4037;
+  }
+
+  .question-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 34px 32px;
+    width: 100%;
+    max-width: 680px;
+    text-align: center;
+    animation: popIn .35s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes popIn {
+    from { transform: scale(.85); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+  }
+  .question-num {
+    font-size: .85rem;
+    font-weight: 700;
+    color: #aaa;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+  }
+  .question-text {
+    font-family: var(--font-title);
+    font-size: clamp(1.5rem, 4vw, 2.2rem);
+    color: #333;
+    margin-bottom: 28px;
+    line-height: 1.3;
+  }
+  .question-hint {
+    font-size: .92rem;
+    color: #888;
+    margin-bottom: 22px;
+  }
+
+  /* OPTIONS */
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 10px;
+  }
+  .opt-btn {
+    background: #F5F5F5;
+    border: 3px solid #E0E0E0;
+    border-radius: 16px;
+    padding: 16px 12px;
+    font-family: var(--font-body);
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .16s;
+    color: #333;
+  }
+  .opt-btn:hover:not(:disabled) { background: #E8F5E9; border-color: var(--green); color: var(--green-d); transform: scale(1.04); }
+  .opt-btn.correct  { background: #E8F5E9 !important; border-color: var(--green) !important; color: var(--green-d) !important; }
+  .opt-btn.wrong    { background: #FFEBEE !important; border-color: var(--red)   !important; color: var(--red-d)   !important; }
+  .opt-btn:disabled { cursor: default; }
+
+  /* SPELL INPUT */
+  .spell-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .spell-input {
+    font-family: var(--font-title);
+    font-size: 1.8rem;
+    text-align: center;
+    border: 3px solid #ddd;
+    border-radius: 16px;
+    padding: 12px 24px;
+    width: 100%;
+    max-width: 320px;
+    outline: none;
+    transition: border-color .2s;
+    color: #333;
+    background: #FAFAFA;
+  }
+  .spell-input:focus { border-color: var(--blue); background: #fff; }
+  .spell-input.correct-input { border-color: var(--green); background: #E8F5E9; }
+  .spell-input.wrong-input   { border-color: var(--red);   background: #FFEBEE; }
+  .btn-check {
+    background: var(--blue);
+    color: #fff;
+    border: none;
+    border-radius: 100px;
+    padding: 14px 40px;
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: background .15s, transform .1s;
+  }
+  .btn-check:hover { background: var(--blue-d); transform: scale(1.04); }
+
+  /* FEEDBACK */
+  .feedback-msg {
+    margin-top: 18px;
+    padding: 12px 22px;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 1.05rem;
+    min-height: 44px;
+    transition: all .2s;
+  }
+  .feedback-msg.ok  { background: #E8F5E9; color: var(--green-d); }
+  .feedback-msg.bad { background: #FFEBEE; color: var(--red-d); }
+
+  .btn-next {
+    margin-top: 18px;
+    background: var(--orange);
+    color: #fff;
+    border: none;
+    border-radius: 100px;
+    padding: 14px 44px;
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    font-weight: 800;
+    cursor: pointer;
+    display: none;
+    transition: background .15s, transform .1s;
+    animation: popIn .3s ease;
+  }
+  .btn-next:hover { background: var(--orange-d); transform: scale(1.04); }
+  .btn-next.visible { display: inline-block; }
+
+  /* DINO REACTION */
+  .dino-reaction { font-size: 2.8rem; margin-bottom: 6px; transition: all .3s; }
+
+  /* ====== RESULTS ====== */
+  #results {
+    justify-content: center;
+    background: linear-gradient(160deg, #E8F5E9 0%, #FFF9F0 60%, #E3F2FD 100%);
+  }
+  .result-card {
+    background: var(--card);
+    border-radius: 32px;
+    box-shadow: var(--shadow);
+    padding: 44px 36px;
+    text-align: center;
+    max-width: 480px;
+    width: 100%;
+    animation: popIn .4s cubic-bezier(.34,1.56,.64,1);
+  }
+  .result-card h2 { font-family: var(--font-title); font-size: 2.2rem; margin: 16px 0 6px; }
+  .result-score-big {
+    font-family: var(--font-title);
+    font-size: 4rem;
+    color: var(--orange);
+    margin: 10px 0;
+  }
+  .result-stars { font-size: 2.2rem; margin: 8px 0 20px; }
+  .result-msg { color: #666; font-size: 1rem; margin-bottom: 28px; }
+  .result-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .btn-primary {
+    background: var(--green);
+    color: #fff;
+    border: none;
+    border-radius: 100px;
+    padding: 14px 34px;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: background .15s, transform .1s;
+  }
+  .btn-primary:hover { background: var(--green-d); transform: scale(1.04); }
+  .btn-secondary {
+    background: #eee;
+    color: #444;
+    border: none;
+    border-radius: 100px;
+    padding: 14px 34px;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .btn-secondary:hover { background: #ddd; }
+
+  /* ====== CONFETTI ====== */
+  .confetti-piece {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    top: -20px;
+    animation: confettiFall linear forwards;
+    pointer-events: none;
+    z-index: 9999;
+  }
+  @keyframes confettiFall {
+    to { transform: translateY(105vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* ====== STARS DISPLAY ====== */
+  .stars-row { display: flex; justify-content: center; gap: 6px; margin-bottom: 10px; }
+  .star { font-size: 1.5rem; transition: transform .2s; }
+  .star.lit { animation: starPop .4s ease; }
+  @keyframes starPop {
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.5); }
+  }
+
+  /* ====== RESPONSIVE ====== */
+  @media (max-width: 500px) {
+    .options-grid { grid-template-columns: 1fr; }
+    .question-card { padding: 24px 18px; }
+    .result-card { padding: 32px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== HOME ===== -->
+<div id="home" class="screen active">
+  <div class="home-header">
+    <div class="dino-float">🦖</div>
+    <h1>Dino Learn</h1>
+    <p>¡Aprendé jugando con los dinosaurios! 🌟</p>
+  </div>
+  <div class="category-grid">
+    <div class="cat-card english" onclick="selectCategory('english')">
+      <div class="cat-icon">🇬🇧</div>
+      <h2>English</h2>
+      <p>Vocabulario, animales, colores, números y más</p>
+      <span class="cat-badge">Spell & Choose</span>
+    </div>
+    <div class="cat-card math" onclick="selectCategory('math')">
+      <div class="cat-icon">🔢</div>
+      <h2>Matemáticas</h2>
+      <p>Suma, resta, multiplicación y división</p>
+      <span class="cat-badge">10 ejercicios</span>
+    </div>
+    <div class="cat-card lengua" onclick="selectCategory('lengua')">
+      <div class="cat-icon">📝</div>
+      <h2>Lengua</h2>
+      <p>Completar palabras, sinónimos y ortografía</p>
+      <span class="cat-badge">10 preguntas</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== LEVEL SELECT ===== -->
+<div id="levelSelect" class="screen">
+  <div class="level-header">
+    <div id="levelDino" style="font-size:2.5rem; margin-bottom:8px;">🦖</div>
+    <h2 id="levelTitle">Elegí el nivel</h2>
+    <p id="levelSubtitle">¿Cuánto sabés?</p>
+  </div>
+  <div class="level-grid">
+    <div class="level-card easy" onclick="startGame('easy')">
+      <div class="lv-icon">🌱</div>
+      <h3>Fácil</h3>
+      <p>Para comenzar (5-7 años)</p>
+    </div>
+    <div class="level-card medium" onclick="startGame('medium')">
+      <div class="lv-icon">⚡</div>
+      <h3>Medio</h3>
+      <p>Un desafío mayor (8-10 años)</p>
+    </div>
+    <div class="level-card hard" onclick="startGame('hard')">
+      <div class="lv-icon">🔥</div>
+      <h3>Difícil</h3>
+      <p>Para los más aventureros (11+ años)</p>
+    </div>
+  </div>
+  <button class="btn-back" onclick="goHome()">← Volver al inicio</button>
+</div>
+
+<!-- ===== GAME ===== -->
+<div id="game" class="screen">
+  <div class="game-top">
+    <div class="game-title" id="gameTitle">🦖 Dino Learn</div>
+    <div class="score-badge">⭐ <span id="scoreDisplay">0</span></div>
+  </div>
+  <div class="game-progress">
+    <div class="game-progress-bar" id="progressBar" style="width:0%"></div>
+  </div>
+  <div class="question-card">
+    <div class="dino-reaction" id="dinoReaction">🦖</div>
+    <div class="question-num" id="questionNum">Pregunta 1 de 10</div>
+    <div class="question-text" id="questionText">...</div>
+    <div class="question-hint" id="questionHint"></div>
+
+    <!-- multiple choice -->
+    <div class="options-grid" id="optionsGrid"></div>
+
+    <!-- spell input -->
+    <div class="spell-wrap" id="spellWrap" style="display:none">
+      <input class="spell-input" id="spellInput" type="text" placeholder="Escribí tu respuesta..." autocomplete="off" autocorrect="off" spellcheck="false">
+      <button class="btn-check" onclick="checkSpell()">✓ Verificar</button>
+    </div>
+
+    <div class="feedback-msg" id="feedbackMsg"></div>
+    <button class="btn-next" id="btnNext" onclick="nextQuestion()">Siguiente →</button>
+  </div>
+</div>
+
+<!-- ===== RESULTS ===== -->
+<div id="results" class="screen">
+  <div class="result-card">
+    <div style="font-size:3.5rem" id="resultDino">🦖</div>
+    <h2 id="resultTitle">¡Terminaste!</h2>
+    <div class="result-score-big" id="resultScore">7/10</div>
+    <div class="result-stars" id="resultStars">⭐⭐⭐</div>
+    <p class="result-msg" id="resultMsg">¡Muy bien hecho!</p>
+    <div class="result-btns">
+      <button class="btn-primary" onclick="restartSame()">🔄 Jugar de nuevo</button>
+      <button class="btn-secondary" onclick="goHome()">🏠 Inicio</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+let currentCategory = '';
+let currentLevel = '';
+let questions = [];
+let currentQ = 0;
+let score = 0;
+const TOTAL = 10;
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goHome() { showScreen('home'); }
+
+function selectCategory(cat) {
+  currentCategory = cat;
+  const titles = { english: '🇬🇧 English', math: '🔢 Matemáticas', lengua: '📝 Lengua' };
+  const subs   = { english: 'Vocabulario en inglés', math: 'Operaciones matemáticas', lengua: 'Español y ortografía' };
+  const dinos  = { english: '🦕', math: '🦴', lengua: '🦎' };
+  document.getElementById('levelTitle').textContent = titles[cat];
+  document.getElementById('levelSubtitle').textContent = subs[cat];
+  document.getElementById('levelDino').textContent = dinos[cat];
+  showScreen('levelSelect');
+}
+
+function startGame(level) {
+  currentLevel = level;
+  score = 0;
+  currentQ = 0;
+  questions = buildQuestions(currentCategory, currentLevel);
+  shuffle(questions);
+  questions = questions.slice(0, TOTAL);
+  const titles = { english: '🇬🇧 English', math: '🔢 Matemáticas', lengua: '📝 Lengua' };
+  document.getElementById('gameTitle').textContent = titles[currentCategory];
+  showScreen('game');
+  renderQuestion();
+}
+
+function restartSame() { startGame(currentLevel); }
+
+// ============================================================
+// SHUFFLE
+// ============================================================
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// ============================================================
+// QUESTION BANKS
+// ============================================================
+
+// ----- ENGLISH -----
+const englishData = {
+  easy: [
+    { type:'choice', q:'🐱 What is this animal in English?', hint:'Es un animal doméstico', answer:'Cat', opts:['Cat','Dog','Fish','Bird'] },
+    { type:'choice', q:'🐶 What is this animal in English?', hint:'El mejor amigo del hombre', answer:'Dog', opts:['Cat','Dog','Cow','Duck'] },
+    { type:'choice', q:'🍎 What color is an apple?', hint:'Un color primario', answer:'Red', opts:['Red','Blue','Green','Yellow'] },
+    { type:'choice', q:'☀️ What is the big yellow star in the sky?', hint:'Sale cada mañana', answer:'Sun', opts:['Moon','Star','Sun','Cloud'] },
+    { type:'choice', q:'🌊 What is H₂O in English?', hint:'La tomamos todos los días', answer:'Water', opts:['Milk','Juice','Water','Soda'] },
+    { type:'choice', q:'🐟 What is this animal?', hint:'Vive en el mar', answer:'Fish', opts:['Bird','Fish','Frog','Crab'] },
+    { type:'choice', q:'🌳 What is a big green plant with a trunk?', hint:'Da sombra en el parque', answer:'Tree', opts:['Flower','Grass','Tree','Leaf'] },
+    { type:'choice', q:'📚 Where do you go to study and learn?', hint:'Todos los niños van', answer:'School', opts:['Park','School','Home','Mall'] },
+    { type:'choice', q:'🍌 What fruit is yellow and long?', hint:'A los monos les encanta', answer:'Banana', opts:['Apple','Grape','Banana','Mango'] },
+    { type:'choice', q:'🎨 What are you doing when you use colors on paper?', hint:'Un pasatiempo creativo', answer:'Drawing', opts:['Reading','Singing','Drawing','Dancing'] },
+    { type:'choice', q:'👁️ What body part do you use to see?', hint:'Tenemos dos', answer:'Eye', opts:['Ear','Nose','Eye','Hand'] },
+    { type:'choice', q:'👂 What body part do you use to hear?', hint:'Tenemos dos a los lados', answer:'Ear', opts:['Eye','Ear','Mouth','Nose'] },
+    { type:'spell',  q:'🐱 How do you spell the word for "gato" in English?', hint:'3 letras', answer:'cat' },
+    { type:'spell',  q:'🔴 How do you spell the color "rojo" in English?', hint:'3 letras', answer:'red' },
+    { type:'spell',  q:'☀️ How do you spell "sol" in English?', hint:'3 letras', answer:'sun' },
+  ],
+  medium: [
+    { type:'choice', q:'🐘 What is the largest land animal?', answer:'Elephant', opts:['Giraffe','Elephant','Hippo','Tiger'] },
+    { type:'choice', q:'🌍 What is the planet where we live?', answer:'Earth', opts:['Mars','Earth','Venus','Jupiter'] },
+    { type:'choice', q:'⬛ What is the opposite of "white"?', answer:'Black', opts:['Gray','Blue','Black','Brown'] },
+    { type:'choice', q:'🧊 What does water turn into when it is very cold?', answer:'Ice', opts:['Snow','Cloud','Steam','Ice'] },
+    { type:'choice', q:'🌙 What appears in the sky at night?', answer:'Moon', opts:['Sun','Star','Moon','Comet'] },
+    { type:'choice', q:'🏃 What do you call moving very fast on your feet?', answer:'Running', opts:['Walking','Jumping','Running','Swimming'] },
+    { type:'choice', q:'📖 What do you find lots of words and stories in?', answer:'Book', opts:['Box','Bag','Book','Ball'] },
+    { type:'choice', q:'🌧️ What falls from clouds when it rains?', answer:'Rain', opts:['Snow','Rain','Hail','Fog'] },
+    { type:'choice', q:'🍕 What Italian food has cheese and tomato on it?', answer:'Pizza', opts:['Pasta','Pizza','Bread','Burger'] },
+    { type:'spell',  q:'🐘 How do you spell "elefante" in English?', hint:'8 letras', answer:'elephant' },
+    { type:'spell',  q:'🌍 How do you spell "tierra" (our planet) in English?', hint:'5 letras', answer:'earth' },
+    { type:'spell',  q:'📖 How do you spell "libro" in English?', hint:'4 letras', answer:'book' },
+    { type:'spell',  q:'🌧️ How do you spell "lluvia" in English?', hint:'4 letras', answer:'rain' },
+    { type:'choice', q:'🏠 What is the word for "casa" in English?', answer:'House', opts:['House','Horse','Hose','Hole'] },
+    { type:'choice', q:'⏰ What tells you what time it is?', answer:'Clock', opts:['Watch','Clock','Timer','Alarm'] },
+  ],
+  hard: [
+    { type:'spell',  q:'🦋 How do you spell "mariposa" in English?', hint:'9 letras', answer:'butterfly' },
+    { type:'spell',  q:'🍓 How do you spell "fresa" in English?', hint:'10 letras', answer:'strawberry' },
+    { type:'spell',  q:'🌈 How do you spell "arcoíris" in English?', hint:'7 letras', answer:'rainbow' },
+    { type:'spell',  q:'🏔️ How do you spell "montaña" in English?', hint:'8 letras', answer:'mountain' },
+    { type:'choice', q:'🦋 What is the stage BEFORE a butterfly?', answer:'Caterpillar', opts:['Larva','Pupa','Caterpillar','Cocoon'] },
+    { type:'choice', q:'💧 What is the process of water turning into vapor?', answer:'Evaporation', opts:['Condensation','Evaporation','Precipitation','Erosion'] },
+    { type:'choice', q:'🌡️ What instrument measures temperature?', answer:'Thermometer', opts:['Barometer','Compass','Thermometer','Telescope'] },
+    { type:'choice', q:'🧲 What do you call an object that attracts metal?', answer:'Magnet', opts:['Metal','Magnet','Mineral','Marble'] },
+    { type:'spell',  q:'🌊 How do you spell "océano" in English?', hint:'5 letras', answer:'ocean' },
+    { type:'spell',  q:'🦁 How do you spell "leona" (female lion) in English?', hint:'7 letras', answer:'lioness' },
+    { type:'choice', q:'🌿 What do plants need to make their own food?', answer:'Sunlight', opts:['Water','Soil','Sunlight','Air'] },
+    { type:'choice', q:'📐 What instrument do you use to measure angles?', answer:'Protractor', opts:['Ruler','Compass','Protractor','Calculator'] },
+    { type:'spell',  q:'🌺 How do you spell "girasol" in English?', hint:'9 letras', answer:'sunflower' },
+    { type:'choice', q:'🗺️ What is the word for the imaginary lines dividing Earth horizontally?', answer:'Latitudes', opts:['Longitudes','Latitudes','Meridians','Parallels'] },
+    { type:'spell',  q:'🦈 How do you spell "tiburón" in English?', hint:'5 letras', answer:'shark' },
+  ]
+};
+
+// ----- MATH -----
+function genMath(level) {
+  const qs = [];
+  const ops = level === 'easy' ? ['+','-'] : level === 'medium' ? ['+','-','×'] : ['+','-','×','÷'];
+  
+  const ranges = {
+    easy:   { add:[1,10], sub:[1,10], mul:[2,5],  div:[1,5]  },
+    medium: { add:[5,20], sub:[5,20], mul:[2,10], div:[2,8]  },
+    hard:   { add:[10,50],sub:[10,50],mul:[5,12], div:[3,12] }
+  };
+  const r = ranges[level];
+
+  while (qs.length < 20) {
+    const op = ops[Math.floor(Math.random() * ops.length)];
+    let a, b, answer, q;
+
+    if (op === '+') {
+      a = rand(r.add[0], r.add[1]);
+      b = rand(r.add[0], r.add[1]);
+      answer = a + b;
+      q = `${a} + ${b} = ?`;
+    } else if (op === '-') {
+      a = rand(r.sub[0], r.sub[1]);
+      b = rand(1, a);
+      answer = a - b;
+      q = `${a} - ${b} = ?`;
+    } else if (op === '×') {
+      a = rand(r.mul[0], r.mul[1]);
+      b = rand(2, r.mul[1]);
+      answer = a * b;
+      q = `${a} × ${b} = ?`;
+    } else {
+      b = rand(r.div[0], r.div[1]);
+      answer = rand(r.div[0], r.div[1]);
+      a = b * answer;
+      q = `${a} ÷ ${b} = ?`;
+    }
+
+    const wrong = generateWrongNums(answer, 3);
+    const opts = shuffle([answer, ...wrong]).map(String);
+    qs.push({ type:'choice', q, answer: String(answer), opts });
+  }
+  return qs;
+}
+
+function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+function generateWrongNums(correct, count) {
+  const wrong = new Set();
+  while (wrong.size < count) {
+    const delta = rand(-5, 5);
+    const candidate = correct + delta;
+    if (candidate !== correct && candidate >= 0) wrong.add(candidate);
+  }
+  return [...wrong];
+}
+
+// ----- LENGUA -----
+const lenguaData = {
+  easy: [
+    { type:'choice', q:'¿Cuál de estas palabras es el plural de "gato"?', answer:'Gatos', opts:['Gatos','Gatoz','Gatoss','Gato'] },
+    { type:'choice', q:'Completá: "El perro ___ en el parque."', answer:'juega', opts:['juega','juegan','jugó','jugará'] },
+    { type:'choice', q:'¿Cuál es el sinónimo de "feliz"?', answer:'Contento', opts:['Triste','Enojado','Contento','Cansado'] },
+    { type:'choice', q:'¿Cómo se escribe correctamente?', answer:'Árbol', opts:['Arbol','Árbol','Arból','árbol'] },
+    { type:'choice', q:'¿Cuál es el sinónimo de "grande"?', answer:'Enorme', opts:['Pequeño','Enorme','Delgado','Rápido'] },
+    { type:'choice', q:'Completá: "La nena ___ una torta."', answer:'comió', opts:['comió','comemos','comerán','comía'] },
+    { type:'choice', q:'¿Cuál es el antónimo de "frío"?', answer:'Caliente', opts:['Helado','Tibio','Caliente','Fresco'] },
+    { type:'spell',  q:'Escribí la palabra que suena como "sol" pero es una flor amarilla:', hint:'8 letras: g-i-r-a-s-o-l', answer:'girasol' },
+    { type:'choice', q:'¿Cuál de estas palabras lleva tilde?', answer:'Camión', opts:['Camion','Camión','Camíon','Camioñ'] },
+    { type:'choice', q:'¿Cuál es el plural de "ciudad"?', answer:'Ciudades', opts:['Ciudads','Ciudades','Ciudades','Ciudads'] },
+    { type:'choice', q:'Completá: "___ mamá cocina muy bien."', answer:'Mi', opts:['Mí','Mi','Me','Mis'] },
+    { type:'choice', q:'¿Qué animal hace "miau"?', answer:'Gato', opts:['Perro','Gato','Vaca','Rana'] },
+    { type:'spell',  q:'Escribí la palabra correcta para "casa donde vivimos":', hint:'4 letras', answer:'casa' },
+    { type:'choice', q:'¿Cuál es el sinónimo de "rápido"?', answer:'Veloz', opts:['Lento','Veloz','Pesado','Tranquilo'] },
+    { type:'choice', q:'¿Cómo se escribe correctamente?', answer:'Mariposa', opts:['Mariposá','Mariposa','Maríposa','Mariposah'] },
+  ],
+  medium: [
+    { type:'choice', q:'¿Cuál de estas palabras es un sustantivo?', answer:'Montaña', opts:['Correr','Rojo','Montaña','Rápido'] },
+    { type:'choice', q:'¿Cuál es el sinónimo de "miedo"?', answer:'Terror', opts:['Alegría','Amor','Terror','Bondad'] },
+    { type:'choice', q:'Completá: "Los chicos ___ al fútbol."', answer:'juegan', opts:['juega','juego','juegan','jugamos'] },
+    { type:'choice', q:'¿Cuál de estas palabras es un adjetivo?', answer:'Brillante', opts:['Correr','Brillante','Libro','Hablar'] },
+    { type:'choice', q:'¿Cómo se escribe correctamente?', answer:'Murciélago', opts:['Murcielago','Murciélago','Murciélagó','Murciélaggo'] },
+    { type:'choice', q:'¿Cuál es el antónimo de "comenzar"?', answer:'Terminar', opts:['Seguir','Terminar','Continuar','Avanzar'] },
+    { type:'choice', q:'¿Qué tipo de palabra es "corre" en la oración "El perro corre"?', answer:'Verbo', opts:['Sustantivo','Adjetivo','Verbo','Artículo'] },
+    { type:'spell',  q:'Escribí la palabra que significa "conjunto de palabras con sentido":', hint:'6 letras: o-r-a-c-i-ó-n', answer:'oración' },
+    { type:'choice', q:'¿Cuál es el sinónimo de "triste"?', answer:'Melancólico', opts:['Alegre','Feliz','Melancólico','Contento'] },
+    { type:'choice', q:'¿Cuál es el plural de "lápiz"?', answer:'Lápices', opts:['Lápizs','Lápices','Lápizes','Lapices'] },
+    { type:'choice', q:'¿Cuál es el antónimo de "encender"?', answer:'Apagar', opts:['Prender','Iluminar','Apagar','Brillar'] },
+    { type:'choice', q:'Completá: "Hoy ___ mucho frío."', answer:'hace', opts:['hay','es','hace','tiene'] },
+    { type:'spell',  q:'Escribí el sinónimo de "bonito" que empieza con "h":', hint:'8 letras: h-e-r-m-o-s-o', answer:'hermoso' },
+    { type:'choice', q:'¿Cómo se escribe correctamente?', answer:'Búho', opts:['Buho','Búho','Buhó','Búhó'] },
+    { type:'choice', q:'¿Qué es "el, la, los, las"?', answer:'Artículos', opts:['Verbos','Sustantivos','Artículos','Adjetivos'] },
+  ],
+  hard: [
+    { type:'choice', q:'¿Cuál de estas oraciones está en voz pasiva?', answer:'La torta fue comida por Juan', opts:['Juan comió la torta','La torta fue comida por Juan','Juan come torta','Comer torta es rico'] },
+    { type:'choice', q:'¿Cuál es el sinónimo de "elocuente"?', answer:'Eloquente', opts:['Callado','Mudo','Eloquente','Tímido'] },
+    { type:'spell',  q:'Escribí la palabra que significa "arte de la escritura correcta":', hint:'10 letras: o-r-t-o-g-r-a-f-í-a', answer:'ortografía' },
+    { type:'choice', q:'¿Cuál es el antónimo de "efímero"?', answer:'Eterno', opts:['Rápido','Breve','Eterno','Temporal'] },
+    { type:'choice', q:'¿Qué figura retórica es "El cielo llora"?', answer:'Personificación', opts:['Metáfora','Símil','Personificación','Hipérbole'] },
+    { type:'choice', q:'¿Cuál es el tiempo verbal de "habremos llegado"?', answer:'Futuro perfecto', opts:['Pretérito','Presente','Futuro perfecto','Condicional'] },
+    { type:'choice', q:'¿Cuál de estas palabras es un adverbio de tiempo?', answer:'Ayer', opts:['Muy','Aquí','Ayer','Bien'] },
+    { type:'spell',  q:'Escribí la palabra que designa al punto y la coma juntos:', hint:'9 letras: p-u-n-t-o-c-o-m-a', answer:'puntoycoma' },
+    { type:'choice', q:'¿Qué tipo de oración es "¡Qué hermoso día!"?', answer:'Exclamativa', opts:['Interrogativa','Imperativa','Exclamativa','Negativa'] },
+    { type:'choice', q:'¿Cuál es el sinónimo culto de "empezar"?', answer:'Iniciar', opts:['Terminar','Iniciar','Continuar','Retomar'] },
+    { type:'choice', q:'¿Qué es un monólogo?', answer:'Texto hablado por una sola persona', opts:['Diálogo entre dos','Poema sin rima','Texto hablado por una sola persona','Escena de teatro'] },
+    { type:'choice', q:'¿Cuál lleva tilde diacrítica?', answer:'Él (pronombre)', opts:['El (artículo)','Él (pronombre)','El árbol','El libro'] },
+    { type:'spell',  q:'Escribí la palabra que denomina el conjunto de signos de escritura:', hint:'9 letras: a-b-e-c-e-d-a-r-i-o', answer:'abecedario' },
+    { type:'choice', q:'¿Cuál es el campo semántico de "pino, roble, sauce"?', answer:'Árboles', opts:['Flores','Animales','Árboles','Frutas'] },
+    { type:'choice', q:'¿Cuál figura retórica usa "como" para comparar?', answer:'Símil', opts:['Metáfora','Símil','Hipérbole','Anáfora'] },
+  ]
+};
+
+// ============================================================
+// BUILD QUESTIONS
+// ============================================================
+function buildQuestions(cat, level) {
+  if (cat === 'math') return genMath(level);
+  if (cat === 'english') return [...englishData[level]];
+  if (cat === 'lengua')  return [...lenguaData[level]];
+  return [];
+}
+
+// ============================================================
+// RENDER QUESTION
+// ============================================================
+function renderQuestion() {
+  const q = questions[currentQ];
+  const pct = (currentQ / TOTAL) * 100;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('questionNum').textContent = `Pregunta ${currentQ + 1} de ${TOTAL}`;
+  document.getElementById('questionText').textContent = q.q;
+  document.getElementById('questionHint').textContent = q.hint || '';
+  document.getElementById('feedbackMsg').textContent = '';
+  document.getElementById('feedbackMsg').className = 'feedback-msg';
+  document.getElementById('btnNext').classList.remove('visible');
+  document.getElementById('dinoReaction').textContent = '🦖';
+  document.getElementById('scoreDisplay').textContent = score;
+
+  const optGrid = document.getElementById('optionsGrid');
+  const spellWrap = document.getElementById('spellWrap');
+  const spellInput = document.getElementById('spellInput');
+
+  if (q.type === 'choice') {
+    optGrid.style.display = 'grid';
+    spellWrap.style.display = 'none';
+    optGrid.innerHTML = '';
+    const shuffledOpts = [...q.opts];
+    shuffle(shuffledOpts);
+    shuffledOpts.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'opt-btn';
+      btn.textContent = opt;
+      btn.onclick = () => checkChoice(btn, opt, q.answer);
+      optGrid.appendChild(btn);
+    });
+  } else {
+    optGrid.style.display = 'none';
+    spellWrap.style.display = 'flex';
+    spellInput.value = '';
+    spellInput.className = 'spell-input';
+    spellInput.disabled = false;
+    spellInput.focus();
+    spellInput.onkeydown = (e) => { if (e.key === 'Enter') checkSpell(); };
+  }
+}
+
+// ============================================================
+// CHECK ANSWERS
+// ============================================================
+function checkChoice(btn, chosen, correct) {
+  const buttons = document.querySelectorAll('.opt-btn');
+  buttons.forEach(b => b.disabled = true);
+
+  const isCorrect = chosen.toLowerCase().trim() === correct.toLowerCase().trim();
+  if (isCorrect) {
+    btn.classList.add('correct');
+    score++;
+    showFeedback(true);
+  } else {
+    btn.classList.add('wrong');
+    // highlight correct
+    buttons.forEach(b => {
+      if (b.textContent.toLowerCase().trim() === correct.toLowerCase().trim()) b.classList.add('correct');
+    });
+    showFeedback(false, correct);
+  }
+  document.getElementById('btnNext').classList.add('visible');
+}
+
+function checkSpell() {
+  const input = document.getElementById('spellInput');
+  const val = input.value.trim().toLowerCase();
+  const correct = questions[currentQ].answer.toLowerCase();
+  input.disabled = true;
+
+  if (val === correct) {
+    input.classList.add('correct-input');
+    score++;
+    showFeedback(true);
+  } else {
+    input.classList.add('wrong-input');
+    showFeedback(false, questions[currentQ].answer);
+  }
+  document.getElementById('btnNext').classList.add('visible');
+}
+
+function showFeedback(ok, correct) {
+  const msg = document.getElementById('feedbackMsg');
+  const dino = document.getElementById('dinoReaction');
+  if (ok) {
+    const positives = ['¡Excelente! 🎉','¡Correcto! 🌟','¡Muy bien! 🚀','¡Genial! 🏆','¡Eso es! ✨','¡Fantástico! 🦖'];
+    msg.textContent = positives[Math.floor(Math.random() * positives.length)];
+    msg.className = 'feedback-msg ok';
+    dino.textContent = '🎉';
+  } else {
+    msg.textContent = `Casi... La respuesta correcta es: "${correct}"`;
+    msg.className = 'feedback-msg bad';
+    dino.textContent = '😢';
+  }
+}
+
+// ============================================================
+// NEXT QUESTION
+// ============================================================
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= TOTAL) {
+    showResults();
+  } else {
+    renderQuestion();
+  }
+}
+
+// ============================================================
+// RESULTS
+// ============================================================
+function showResults() {
+  document.getElementById('progressBar').style.width = '100%';
+  const pct = score / TOTAL;
+  let stars = pct >= 0.9 ? '⭐⭐⭐' : pct >= 0.6 ? '⭐⭐' : '⭐';
+  let title = pct >= 0.9 ? '¡Sos un genio! 🏆' : pct >= 0.6 ? '¡Muy bien! 🎉' : '¡Seguí intentando! 💪';
+  let msg = pct >= 0.9 ? '¡Perfecto! ¡Respondiste casi todo bien!' : pct >= 0.6 ? '¡Buen trabajo! Con un poco más de práctica vas a ser campeón.' : '¡No te rindas! Cada intento te hace más inteligente.';
+  let dinoEmoji = pct >= 0.9 ? '🏆' : pct >= 0.6 ? '🎊' : '🦖';
+
+  document.getElementById('resultDino').textContent = dinoEmoji;
+  document.getElementById('resultTitle').textContent = title;
+  document.getElementById('resultScore').textContent = `${score}/${TOTAL}`;
+  document.getElementById('resultStars').textContent = stars;
+  document.getElementById('resultMsg').textContent = msg;
+
+  showScreen('results');
+  if (pct >= 0.6) launchConfetti();
+}
+
+// ============================================================
+// CONFETTI
+// ============================================================
+function launchConfetti() {
+  const colors = ['#FF8C42','#4CAF50','#42A5F5','#FFD54F','#AB47BC','#EF5350'];
+  for (let i = 0; i < 60; i++) {
+    setTimeout(() => {
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      piece.style.left = Math.random() * 100 + 'vw';
+      piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+      piece.style.width = (8 + Math.random() * 8) + 'px';
+      piece.style.height = (8 + Math.random() * 8) + 'px';
+      piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      piece.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+      document.body.appendChild(piece);
+      setTimeout(() => piece.remove(), 4000);
+    }, i * 40);
+  }
+}
+</script>
+</body>
+</html>
